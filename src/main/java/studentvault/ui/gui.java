@@ -1,6 +1,7 @@
+package ui;
 import java.awt.*;
 import javax.swing.*;
-
+import ui.panels.SidePanel;
 public class gui extends JFrame {
     private final CardLayout cardLayout;
     private final JPanel contentPanel;
