@@ -1,5 +1,3 @@
-package panels;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
@@ -30,7 +28,7 @@ public class AddStudentPanel extends JPanel {
         mainGBC.gridy = 1;  // Move to the next row
         mainGBC.weighty = 1;  // This row takes up more space
         JPanel bottomRow = new JPanel(new BorderLayout());
-        bottomRow.setBackground(Color.orange);
+        bottomRow.setBackground(Color.gray);
         JLabel bottomRowJLabel = new JLabel("bottom row");
         bottomRow.add(bottomRowJLabel, BorderLayout.WEST);  // Align to the left
 

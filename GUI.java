@@ -1,15 +1,9 @@
-package app;
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.*;
-import panels.AddStudentPanel;
-import panels.SearchPanel;
-import panels.SidePanel;
-import panels.TablePanel;
 
 public class GUI extends JFrame {
     private final CardLayout cardLayout = new CardLayout();
@@ -31,7 +25,7 @@ public class GUI extends JFrame {
         gbc.weighty = 1;
         gbc.weightx = 0;
         gbc.gridx = 0;
-        SidePanel sidePanel = new SidePanel(this);
+        PSidePanel sidePanel = new PSidePanel(this);
         mainBackground.add(sidePanel, gbc);
 
         gbc.weightx = 1;
@@ -46,12 +40,12 @@ public class GUI extends JFrame {
         tableCardGBC.weighty = 0;
         tableCardGBC.weightx = 1;
         tableCardGBC.gridy = 0;
-        SearchPanel searchPanel = new SearchPanel();
+        PSearchPanel searchPanel = new PSearchPanel();
         tableCard.add(searchPanel, tableCardGBC);
 
         tableCardGBC.weighty = 1;
         tableCardGBC.gridy = 1;
-        TablePanel tablePanel = new TablePanel();
+        PTablePanel tablePanel = new PTablePanel();
         tableCard.add(tablePanel, tableCardGBC);
 
         JPanel addStudentCard = new JPanel(new BorderLayout());

@@ -1,4 +1,3 @@
-package components;
 
 import java.awt.Component;
 import javax.swing.BorderFactory;

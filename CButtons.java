@@ -1,5 +1,3 @@
-package components;
-
 import java.awt.Component;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +5,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
-public class Buttons {
+public class CButtons {
     private static final String ADD_ICON_DEFAULT = "assets/AddIcon.png";
     private static final String ADD_ICON_SELECTED = "assets/SelectedAddIcon.png";
     private static final String TABLE_ICON_DEFAULT = "assets/TableIcon.png";
