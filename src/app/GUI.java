@@ -1,14 +1,20 @@
+package app;
+
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.*;
+import panels.AddStudent;
 import panels.SearchPanel;
 import panels.SidePanel;
 import panels.TablePanel;
 
-
 public class GUI extends JFrame {
-
+    private final CardLayout cardLayout = new CardLayout();
+    private final JPanel rightContainer;
+    
     public GUI() {
         this.setTitle("StudentVault");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -25,31 +31,42 @@ public class GUI extends JFrame {
         gbc.weighty = 1;
         gbc.weightx = 0;
         gbc.gridx = 0;
-        SidePanel sidePanel = new SidePanel();
+        SidePanel sidePanel = new SidePanel(this);
         mainBackground.add(sidePanel, gbc);
 
         gbc.weightx = 1;
         gbc.gridx = 1;
-        JPanel rightContainer = new JPanel(new GridBagLayout());
+        rightContainer = new JPanel(cardLayout);
         mainBackground.add(rightContainer, gbc);
-
-        GridBagConstraints rightContainerGbc = new GridBagConstraints();
-        rightContainerGbc.fill = GridBagConstraints.BOTH;
         
-        rightContainerGbc.weighty = 0;
-        rightContainerGbc.weightx = 1;
-        rightContainerGbc.gridy = 0;
+        JPanel tableCard = new JPanel(new GridBagLayout());
+        GridBagConstraints tableCardGBC = new GridBagConstraints();
+        tableCardGBC.fill = GridBagConstraints.BOTH;
+        
+        tableCardGBC.weighty = 0;
+        tableCardGBC.weightx = 1;
+        tableCardGBC.gridy = 0;
         SearchPanel searchPanel = new SearchPanel();
-        rightContainer.add(searchPanel, rightContainerGbc);
+        tableCard.add(searchPanel, tableCardGBC);
 
-        rightContainerGbc.weighty = 1;
-        rightContainerGbc.gridy = 1;
+        tableCardGBC.weighty = 1;
+        tableCardGBC.gridy = 1;
         TablePanel tablePanel = new TablePanel();
-        rightContainer.add(tablePanel, rightContainerGbc);
+        tableCard.add(tablePanel, tableCardGBC);
 
+        JPanel addStudentCard = new JPanel(new BorderLayout());
+        AddStudent addStudentPanel = new AddStudent();
+        addStudentCard.add(addStudentPanel);
+
+        rightContainer.add(tableCard, "TableCard");
+        rightContainer.add(addStudentCard, "AddStudentCard");
 
         this.add(mainBackground);
         this.setVisible(true);
+    }
+    
+    public void switchPanel(String panelName) {
+        cardLayout.show(rightContainer, panelName);
     }
 
     public static void main(String[] args) {
