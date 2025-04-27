@@ -6,7 +6,7 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.*;
-import panels.AddStudent;
+import panels.AddStudentPanel;
 import panels.SearchPanel;
 import panels.SidePanel;
 import panels.TablePanel;
@@ -55,7 +55,7 @@ public class GUI extends JFrame {
         tableCard.add(tablePanel, tableCardGBC);
 
         JPanel addStudentCard = new JPanel(new BorderLayout());
-        AddStudent addStudentPanel = new AddStudent();
+        AddStudentPanel addStudentPanel = new AddStudentPanel();
         addStudentCard.add(addStudentPanel);
 
         rightContainer.add(tableCard, "TableCard");
