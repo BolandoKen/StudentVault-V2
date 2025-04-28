@@ -49,7 +49,7 @@ public class GUI extends JFrame {
         tableCard.add(tablePanel, tableCardGBC);
 
         JPanel addStudentCard = new JPanel(new BorderLayout());
-        AddStudentPanel addStudentPanel = new AddStudentPanel();
+        PAddStudentPanel addStudentPanel = new PAddStudentPanel();
         addStudentCard.add(addStudentPanel);
 
         rightContainer.add(tableCard, "TableCard");

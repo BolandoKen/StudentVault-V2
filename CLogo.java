@@ -4,7 +4,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
-public class Logo {
+public class CLogo {
     private static final String LOGO_PATH = "Assets/StudentVaultLogo.png";
     
     public static JLabel createLogo() {

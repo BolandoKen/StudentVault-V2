@@ -2,8 +2,8 @@ import java.awt.*;
 import javax.swing.*;
 
 public class PSidePanel extends JPanel {
-    private JButton addButton;
-    private JButton tableButton;
+    private CButtons addButton;
+    private CButtons tableButton;
     private JLabel logo;
 
     public PSidePanel(GUI parentFrame) { 
@@ -12,9 +12,10 @@ public class PSidePanel extends JPanel {
         this.setPreferredSize(new Dimension(98, 1024));
         this.setMinimumSize(new Dimension(98, 0));
 
-        addButton = CButtons.createAddButton();
-        tableButton = CButtons.createTableButton();
-        logo = Logo.createLogo();
+        // Using the new RoundedButton class instead of CButtons
+        addButton = CButtons.createAddIconButton();
+        tableButton = CButtons.createTableIconButton();
+        logo = CLogo.createLogo();
         
         this.add(logo);
         this.add(addButton);
