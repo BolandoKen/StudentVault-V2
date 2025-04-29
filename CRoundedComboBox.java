@@ -1,4 +1,9 @@
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -92,8 +97,33 @@ public class CRoundedComboBox extends JComboBox<String> {
     }
 
     public static CRoundedComboBox createCollegeCombobox(){
-        String[] colleges = {"College of Computer Studies", "College of Engineering", "College of Arts and Sciences"};
-        return new CRoundedComboBox(colleges, "College", bigSize);
+        ArrayList<String> collegeList = new ArrayList<>();
+        String url = "jdbc:mysql://localhost:3306/StudentVault";
+        String username = "root";
+        String password = "root";
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            
+            Connection conn = DriverManager.getConnection(url, username, password);
+            Statement stmt = conn.createStatement();
+            String sql = "SELECT college_name FROM colleges";
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                String collegeName = rs.getString("college_name");
+                collegeList.add(collegeName);
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String[] collegesArray = collegeList.toArray(new String[0]);
+
+        return new CRoundedComboBox(collegesArray, "College", bigSize);
     }
     public static CRoundedComboBox createProgramComboBox() {
         String[] programs = {"Computer Science", "Information Technology", "Engineering", "Business Administration", "Psychology"};
