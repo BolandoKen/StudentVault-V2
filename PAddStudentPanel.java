@@ -46,7 +46,7 @@ public class PAddStudentPanel extends JPanel {
         formPanel.setLayout(new GridBagLayout());
         formPanel.setBackground(Color.white);
         
-        CStudentForm studentForm = new CStudentForm(parentFrame, tablePanel);
+        CStudentForm studentForm = new CStudentForm(parentFrame, tablePanel,null, null);
         formPanel.add(studentForm);
         
         JPanel wrapperPanel = new JPanel(new BorderLayout());

@@ -15,7 +15,7 @@ public class CStudentForm extends JPanel{
     private GUI parentFrame;
     private PTablePanel tablePanel;
 
-    public CStudentForm(GUI parentFrame, PTablePanel tablePanel) {
+    public CStudentForm(GUI parentFrame, PTablePanel tablePanel, CButtons addButton, CButtons tableButton) {
         this.parentFrame = parentFrame;
         this.tablePanel = tablePanel;
         this.setLayout(new GridBagLayout());
@@ -182,7 +182,7 @@ public class CStudentForm extends JPanel{
         JPanel actionPanel = new JPanel(new BorderLayout());
         actionPanel.setBackground(Color.white);
 
-        CButtons addStudentButton = CButtons.createAddStudentButton(tablePanel.getStudentTable());
+        CButtons addStudentButton = CButtons.createAddStudentButton(tablePanel.getStudentTable(), parentFrame, addButton, tableButton);
         actionPanel.add(addStudentButton, BorderLayout.CENTER);
         row5.add(actionPanel, row5Gbc);
         this.add(row5, gbc);

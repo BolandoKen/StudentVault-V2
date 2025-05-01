@@ -36,17 +36,11 @@ public class CButtons extends JButton {
     public CButtons(String text) {
         this(text, DEFAULT_BACKGROUND, DEFAULT_TEXT_COLOR, DEFAULT_FONT, DEFAULT_CORNER_RADIUS, DEFAULT_SIZE);
     }
-    
-    /**
-     * Constructor with basic customization
-     */
+
     public CButtons(String text, Color backgroundColor, Color textColor) {
         this(text, backgroundColor, textColor, DEFAULT_FONT, DEFAULT_CORNER_RADIUS, DEFAULT_SIZE);
     }
-    
-    /**
-     * Icon button constructor
-     */
+
     public CButtons(ImageIcon icon) {
         super(icon);
         this.cornerRadius = 0; // Transparent background for icon buttons
@@ -54,15 +48,12 @@ public class CButtons extends JButton {
         setupIconButton();
     }
     
-    /**
-     * Full constructor with customization options
-     */
     public CButtons(String text, Color backgroundColor, Color textColor, 
                         Font font, int cornerRadius, Dimension size) {
         super(text);
         this.cornerRadius = cornerRadius;
         this.originalColor = backgroundColor;
-        this.backgroundColor = new Color(backgroundColor.getRGB());  // Create a copy to prevent issues
+        this.backgroundColor = new Color(backgroundColor.getRGB());  
         this.hoverColor = calculateHoverColor(backgroundColor);
         this.textColor = textColor;
         this.isIconButton = false;
@@ -138,7 +129,7 @@ public class CButtons extends JButton {
     }
     
     
-    public static CButtons createAddStudentButton(CStudentTable studentTable) {
+    public static CButtons createAddStudentButton(CStudentTable studentTable, GUI parentFrame, CButtons addButton, CButtons tableButton) {
         Color addButtonColor = new Color(0x5C2434);  
         CButtons button = new CButtons("Add Student", addButtonColor, Color.WHITE, 
                                               new Font("Helvetica", Font.PLAIN, 18), 
@@ -161,18 +152,20 @@ public class CButtons extends JButton {
         
         if (success) {
 
+            updateButtonState(tableButton, addButton, tableButton);
             studentTable.refreshData();
-            
+            parentFrame.switchPanel("TableCard");
+           
             JOptionPane.showMessageDialog(null, 
                 "Student added successfully!", 
                 "Success", 
                 JOptionPane.INFORMATION_MESSAGE);
             
-            // Clear form data
             StudentDataManager.clearFormData();
+
+            System.out.println("Student added successfully - tableButton should be selected now");
             
-            // Trigger form reset (you'll need to implement this)
-            // CStudentForm.resetForm();
+            
         } else {
             JOptionPane.showMessageDialog(null, 
                 "Failed to add student. Please try again.", 
@@ -218,9 +211,6 @@ public class CButtons extends JButton {
         return button;
     }
     
-    /**
-     * Updates button states for a group of buttons
-     */
     public static void updateButtonState(CButtons clickedButton, CButtons... allButtons) {
         for (CButtons button : allButtons) {
             button.setIcon((ImageIcon) button.getClientProperty("defaultIcon"));
@@ -228,9 +218,7 @@ public class CButtons extends JButton {
         clickedButton.setIcon((ImageIcon) clickedButton.getClientProperty("selectedIcon"));
     }
     
-    /**
-     * Loads icon from path with caching
-     */
+   
     private static ImageIcon loadIcon(String path) {
         if (!iconCache.containsKey(path)) {
             iconCache.put(path, new ImageIcon(path));
@@ -249,11 +237,10 @@ public class CButtons extends JButton {
     @Override
     protected void paintComponent(Graphics g) {
         if (!isIconButton) {
-            // For regular rounded buttons, draw the background
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Draw rounded background
+            
             g2.setColor(backgroundColor);
             g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius));
 
@@ -265,6 +252,5 @@ public class CButtons extends JButton {
 
     @Override
     protected void paintBorder(Graphics g) {
-        // No border for both types of buttons
     }
 }
