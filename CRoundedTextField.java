@@ -74,19 +74,150 @@ public class CRoundedTextField extends JTextField {
             }
         });
     }
-    
+
+    //First Name field
     public static CRoundedTextField createFirstNameField() {
-        return new CRoundedTextField("First Name", NAME_FIELD_SIZE);
+    CRoundedTextField firstNameField = new CRoundedTextField("First Name", NAME_FIELD_SIZE);
+    
+    // Add a document listener to track changes to the text field
+    firstNameField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        @Override
+        public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            updateFirstName();
+        }
+
+        @Override
+        public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            updateFirstName();
+        }
+
+        @Override
+        public void changedUpdate(javax.swing.event.DocumentEvent e) {
+            updateFirstName();
+        }
+        
+        private void updateFirstName() {
+            String firstName = firstNameField.getText();
+            if (!firstName.equals("First Name") && !firstName.isEmpty()) {
+                StudentDataManager.setFirstName(firstName);
+            }
+        }
+    });
+    
+    return firstNameField;
     }
     
     public static CRoundedTextField createLastNameField() {
-        return new CRoundedTextField("Last Name", NAME_FIELD_SIZE);
+        CRoundedTextField lastNameField = new CRoundedTextField("Last Name", NAME_FIELD_SIZE);
+    
+        // Add a document listener to track changes to the text field
+        lastNameField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                updateLastName();
+            }
+    
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                updateLastName();
+            }
+    
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                updateLastName();
+            }
+            
+            private void updateLastName() {
+                String lastName = lastNameField.getText();
+                if (!lastName.equals("Last Name") && !lastName.isEmpty()) {
+                    StudentDataManager.setLastName(lastName);
+                }
+            }
+        });
+        
+        return lastNameField;
     }
 
+    //ID Field
     public static CRoundedTextField createIdField() {
-        return new CRoundedTextField("ID", DEFAULT_SIZE);
-    }
+        CRoundedTextField idField = new CRoundedTextField("ID (0000-0000)", DEFAULT_SIZE);
+        
+        // Add document filter to enforce ID format (0000-0000)
+        ((javax.swing.text.PlainDocument) idField.getDocument()).setDocumentFilter(
+            new javax.swing.text.DocumentFilter() {
+                @Override
+                public void replace(FilterBypass fb, int offset, int length, String text, 
+                                  javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
+                    
+                    // Skip validation if showing placeholder
+                    if (idField.showingPlaceholder) {
+                        super.replace(fb, offset, length, text, attrs);
+                        return;
+                    }
+                    
+                    String currentText = fb.getDocument().getText(0, fb.getDocument().getLength());
+                    String resultText = currentText.substring(0, offset) + text + currentText.substring(offset + length);
+                    
+                    // Allow backspace and delete operations
+                    if (text.isEmpty()) {
+                        super.replace(fb, offset, length, text, attrs);
+                        return;
+                    }
+                    
+                    // Only allow digits and dash at the correct position
+                    if (resultText.length() <= 9) { // Max length is 9 (including the dash)
+                        if (offset == 4 && text.equals("-")) {
+                            super.replace(fb, offset, length, text, attrs);
+                        } else if (text.matches("[0-9]")) {
+                            // Auto-insert dash after 4th digit
+                            if (offset == 4 && currentText.length() == 4 && !currentText.contains("-")) {
+                                super.replace(fb, offset, length, "-" + text, attrs);
+                            } else if ((offset < 4 || (offset > 4 && resultText.length() <= 9))) {
+                                super.replace(fb, offset, length, text, attrs);
+                            }
+                        }
+                    }
+                }
+                
+                @Override
+                public void insertString(FilterBypass fb, int offset, String text, 
+                                      javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
+                    // Use replace method for consistent handling
+                    replace(fb, offset, 0, text, attr);
+                }
+            }
+        );
+        
+        // Add a document listener to track changes to the text field
+        idField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                updateId();
+            }
     
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                updateId();
+            }
+    
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                updateId();
+            }
+            
+            private void updateId() {
+                String id = idField.getInputText();
+                if (!id.isEmpty()) {
+                    // Only update if ID matches the required format
+                    if (id.matches("\\d{4}-\\d{4}")) {
+                        StudentDataManager.setIdNumber(id);
+                    }
+                }
+            }
+        });
+        
+        return idField;
+    }
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();

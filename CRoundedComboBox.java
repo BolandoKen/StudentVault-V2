@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -93,85 +92,151 @@ public class CRoundedComboBox extends JComboBox<String> {
     
   
     public static CRoundedComboBox createGenderComboBox() {
-        String[] genders = {"Male", "Female", "Non-binary", "Prefer not to say"};
-        return new CRoundedComboBox(genders, "Gender", smallSize);
+    String[] genders = {"Male", "Female", "Non-binary", "Prefer not to say"};
+    CRoundedComboBox genderComboBox = new CRoundedComboBox(genders, "Gender", smallSize);
+    
+    // Add an action listener to save the selected gender
+    genderComboBox.addActionListener(e -> {
+        String selectedGender = (String) genderComboBox.getSelectedItem();
+        if (selectedGender != null && !selectedGender.equals("Gender")) {
+            // Store the selected gender using the StudentDataManager
+            StudentDataManager.setGender(selectedGender);
+            System.out.println("Gender selected: " + selectedGender);
+        }
+    });
+    
+    return genderComboBox;
     }
 
     public static CRoundedComboBox createYearLevelComboBox() {
         String[] yearLevels = {"1st Year", "2nd Year", "3rd Year", "4th Year", "5+"};
-        return new CRoundedComboBox(yearLevels, "Year", smallSize);
+        CRoundedComboBox yearLevelComboBox = new CRoundedComboBox(yearLevels, "Year", smallSize);
+        
+        // Add an action listener to save the selected year level
+        yearLevelComboBox.addActionListener(e -> {
+            String selectedYearLevel = (String) yearLevelComboBox.getSelectedItem();
+            if (selectedYearLevel != null && !selectedYearLevel.equals("Year")) {
+                // Store the selected year level using the StudentDataManager
+                StudentDataManager.setYearLevel(selectedYearLevel);
+                System.out.println("Year Level selected: " + selectedYearLevel);
+            }
+        });
+        
+        return yearLevelComboBox;
     }
 
-    public static CRoundedComboBox createCollegeCombobox(){
+    public static CRoundedComboBox createCollegeCombobox() {
         ArrayList<String> collegeList = new ArrayList<>();
         collegeMap = new HashMap<>();
-
-        String url = "jdbc:mysql://localhost:3306/StudentVault";
-        String username = "root";
-        String password = "root";
-
+    
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            
-            Connection conn = DriverManager.getConnection(url, username, password);
-
+            Connection conn = StudentDataManager.getConnection();
+    
             String sql = "SELECT college_id, college_name FROM colleges";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-
+    
             while (rs.next()) {
                 int collegeId = rs.getInt("college_id");
                 String collegeName = rs.getString("college_name");
-
+    
                 collegeList.add(collegeName);
                 collegeMap.put(collegeName, collegeId);
             }
-
+    
             rs.close();
             stmt.close();
             conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
         String[] collegesArray = collegeList.toArray(new String[0]);
-
-        return new CRoundedComboBox(collegesArray, "College", bigSize);
+        CRoundedComboBox collegeComboBox = new CRoundedComboBox(collegesArray, "College", bigSize);
+        
+        // Add an action listener to save the selected college
+        collegeComboBox.addActionListener(e -> {
+            String selectedCollege = (String) collegeComboBox.getSelectedItem();
+            if (selectedCollege != null && !selectedCollege.equals("College")) {
+                // Get the college_id from the map
+                Integer collegeId = collegeMap.get(selectedCollege);
+                if (collegeId != null) {
+                    // Store the selected college ID using the StudentDataManager
+                    StudentDataManager.setCollegeId(collegeId);
+                    System.out.println("College selected: " + selectedCollege + " (ID: " + collegeId + ")");
+                }
+            }
+        });
+        
+        return collegeComboBox;
     }
 
     //Progem ComboBox
     public static CRoundedComboBox createProgramComboBox(int collegeId) {
         ArrayList<String> programList = new ArrayList<>();
-        String url = "jdbc:mysql://localhost:3306/StudentVault";
-        String username = "root";
-        String password = "root";
-
+        Map<String, Integer> programMap = new HashMap<>();
+        
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = StudentDataManager.getConnection();
+    
+            // Check if we have programs or pragrams table
+            boolean programsExists = false;
+            boolean pragramsExists = false;
             
-            Connection conn = DriverManager.getConnection(url, username, password);
-
-            String sql = "SELECT program_name FROM programs WHERE college_id = ?"; 
+            ResultSet tables = conn.getMetaData().getTables(null, null, "%", null);
+            while (tables.next()) {
+                String tableName = tables.getString("TABLE_NAME");
+                if (tableName.equalsIgnoreCase("programs")) {
+                    programsExists = true;
+                } else if (tableName.equalsIgnoreCase("pragrams")) {
+                    pragramsExists = true;
+                }
+            }
+            
+            String tableName = programsExists ? "programs" : (pragramsExists ? "pragrams" : "programs");
+            
+            // Use correct table name to fetch programs
+            String sql = "SELECT program_id, program_name FROM " + tableName + " WHERE college_id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, collegeId);
-
+            
             ResultSet rs = pstmt.executeQuery();
-
+            
             while (rs.next()) {
+                int programId = rs.getInt("program_id");
                 String programName = rs.getString("program_name");
+                
                 programList.add(programName);
+                programMap.put(programName, programId);
             }
-
+            
             rs.close();
             pstmt.close();
             conn.close();
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Error fetching programs: " + e.getMessage());
         }
+        
         String[] programsArray = programList.toArray(new String[0]);
-
-        return new CRoundedComboBox(programsArray, "Program", bigSize);
+        CRoundedComboBox programComboBox = new CRoundedComboBox(programsArray, "Program", bigSize);
+        
+        // Add action listener to save the selected program
+        programComboBox.addActionListener(e -> {
+            String selectedProgram = (String) programComboBox.getSelectedItem();
+            if (selectedProgram != null && !selectedProgram.equals("Program")) {
+                // Get the program_id from the map
+                Integer programId = programMap.get(selectedProgram);
+                if (programId != null) {
+                    // Store the selected program ID using the StudentDataManager
+                    StudentDataManager.setProgramId(programId);
+                    System.out.println("Program selected: " + selectedProgram + " (ID: " + programId + ")");
+                }
+            }
+        });
+        
+        return programComboBox;
     }
-    
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();

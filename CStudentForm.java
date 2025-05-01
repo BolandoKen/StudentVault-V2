@@ -12,7 +12,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class CStudentForm extends JPanel{
-    public CStudentForm() {
+    private GUI parentFrame;
+    private PTablePanel tablePanel;
+
+    public CStudentForm(GUI parentFrame, PTablePanel tablePanel) {
+        this.parentFrame = parentFrame;
+        this.tablePanel = tablePanel;
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.white);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -176,7 +181,8 @@ public class CStudentForm extends JPanel{
 
         JPanel actionPanel = new JPanel(new BorderLayout());
         actionPanel.setBackground(Color.white);
-        CButtons addStudentButton = CButtons.createAddStudentButton();
+
+        CButtons addStudentButton = CButtons.createAddStudentButton(tablePanel.getStudentTable());
         actionPanel.add(addStudentButton, BorderLayout.CENTER);
         row5.add(actionPanel, row5Gbc);
         this.add(row5, gbc);
@@ -199,6 +205,10 @@ public class CStudentForm extends JPanel{
         cancelPanel.add(cancelButton, BorderLayout.CENTER);
         row6.add(cancelPanel, row6Gbc);
         this.add(row6, gbc);
-       
+
+        cancelButton.addActionListener(e -> {
+            parentFrame.switchPanel("TableCard");
+        });
+
     } 
     }

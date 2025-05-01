@@ -132,26 +132,56 @@ public class CButtons extends JButton {
     public static CButtons createAddCollegeButton() {
         Color addButtonColor = new Color(46, 125, 50);  
         CButtons button = new CButtons("Add College", addButtonColor, Color.WHITE, 
-                                              new Font("Arial", Font.BOLD, 16), 
+                                              new Font("Helvetica", Font.BOLD, 16), 
                                               DEFAULT_CORNER_RADIUS, ADD_COLLEGE_SIZE);
         return button;
     }
     
     
-    public static CButtons createAddCollegeButton(int width, int height) {
-        Color addButtonColor = new Color(46, 125, 50);  
-        CButtons button = new CButtons("Add College", addButtonColor, Color.WHITE, 
-                                              new Font("Arial", Font.BOLD, 16), 
-                                              DEFAULT_CORNER_RADIUS, new Dimension(width, height));
-        return button;
-    }
-    
-    public static CButtons createAddStudentButton(){
+    public static CButtons createAddStudentButton(CStudentTable studentTable) {
         Color addButtonColor = new Color(0x5C2434);  
         CButtons button = new CButtons("Add Student", addButtonColor, Color.WHITE, 
                                               new Font("Helvetica", Font.PLAIN, 18), 
                                               DEFAULT_CORNER_RADIUS, DEFAULT_SIZE);
-        return button;
+
+        button.addActionListener(e -> {
+
+
+        // Validate required fields
+        if (!StudentDataManager.validateFields()) {
+            JOptionPane.showMessageDialog(null, 
+                "Please fill in all required fields.", 
+                "Missing Information", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Try to save data to database
+        boolean success = StudentDataManager.saveStudent();
+        
+        if (success) {
+
+            studentTable.refreshData();
+            
+            JOptionPane.showMessageDialog(null, 
+                "Student added successfully!", 
+                "Success", 
+                JOptionPane.INFORMATION_MESSAGE);
+            
+            // Clear form data
+            StudentDataManager.clearFormData();
+            
+            // Trigger form reset (you'll need to implement this)
+            // CStudentForm.resetForm();
+        } else {
+            JOptionPane.showMessageDialog(null, 
+                "Failed to add student. Please try again.", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    });
+    
+    return button;
     }
 
     public static CButtons createCancelButton(){
