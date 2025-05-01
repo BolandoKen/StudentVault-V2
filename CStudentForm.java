@@ -132,11 +132,34 @@ public class CStudentForm extends JPanel{
         JPanel programPanel = new JPanel(new BorderLayout());
         programPanel.setOpaque(false);
 
-        CRoundedComboBox programComboBox = CRoundedComboBox.createProgramComboBox();
+        CRoundedComboBox programComboBox = new CRoundedComboBox(new String[0], "Program", new Dimension(300, 40));
 
         programPanel.add(programComboBox, BorderLayout.CENTER);
         row4.add(programPanel, row4Gbc);
         add(row4, gbc);
+
+        collegeComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                // Get the selected college
+                String selectedCollege = (String) collegeComboBox.getSelectedItem();
+                // Skip placeholder option
+                if (selectedCollege != null && !selectedCollege.equals("College")) {
+                    // Get the college_id from the map
+                    Integer collegeId = CRoundedComboBox.collegeMap.get(selectedCollege);
+                    
+                    if (collegeId != null) {
+                        // Create program combo box based on the selected college_id
+                        CRoundedComboBox updatedProgramComboBox = CRoundedComboBox.createProgramComboBox(collegeId);
+            
+                        // Replace the old program combo box with the updated one
+                        programPanel.removeAll();
+                        programPanel.add(updatedProgramComboBox, BorderLayout.CENTER);
+                        programPanel.revalidate();
+                        programPanel.repaint();
+                    }
+                }
+            }
+        });
 
         // Row 5: AddStudent Button
         gbc.gridy = 5;

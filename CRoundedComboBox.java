@@ -1,9 +1,12 @@
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -22,6 +25,9 @@ public class CRoundedComboBox extends JComboBox<String> {
     
     private int cornerRadius;
     private Color selectionColor;
+
+    public static Map<String, Integer> collegeMap;
+
 
     public CRoundedComboBox() {
         this(new String[]{}, "Select an option", DEFAULT_SIZE);
@@ -98,6 +104,8 @@ public class CRoundedComboBox extends JComboBox<String> {
 
     public static CRoundedComboBox createCollegeCombobox(){
         ArrayList<String> collegeList = new ArrayList<>();
+        collegeMap = new HashMap<>();
+
         String url = "jdbc:mysql://localhost:3306/StudentVault";
         String username = "root";
         String password = "root";
@@ -106,13 +114,17 @@ public class CRoundedComboBox extends JComboBox<String> {
             Class.forName("com.mysql.cj.jdbc.Driver");
             
             Connection conn = DriverManager.getConnection(url, username, password);
+
+            String sql = "SELECT college_id, college_name FROM colleges";
             Statement stmt = conn.createStatement();
-            String sql = "SELECT college_name FROM colleges";
             ResultSet rs = stmt.executeQuery(sql);
 
             while (rs.next()) {
+                int collegeId = rs.getInt("college_id");
                 String collegeName = rs.getString("college_name");
+
                 collegeList.add(collegeName);
+                collegeMap.put(collegeName, collegeId);
             }
 
             rs.close();
@@ -125,9 +137,39 @@ public class CRoundedComboBox extends JComboBox<String> {
 
         return new CRoundedComboBox(collegesArray, "College", bigSize);
     }
-    public static CRoundedComboBox createProgramComboBox() {
-        String[] programs = {"Computer Science", "Information Technology", "Engineering", "Business Administration", "Psychology"};
-        return new CRoundedComboBox(programs, "Program", bigSize);
+
+    //Progem ComboBox
+    public static CRoundedComboBox createProgramComboBox(int collegeId) {
+        ArrayList<String> programList = new ArrayList<>();
+        String url = "jdbc:mysql://localhost:3306/StudentVault";
+        String username = "root";
+        String password = "root";
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            
+            Connection conn = DriverManager.getConnection(url, username, password);
+
+            String sql = "SELECT program_name FROM programs WHERE college_id = ?"; 
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, collegeId);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                String programName = rs.getString("program_name");
+                programList.add(programName);
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String[] programsArray = programList.toArray(new String[0]);
+
+        return new CRoundedComboBox(programsArray, "Program", bigSize);
     }
     
     @Override
