@@ -1,5 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 public class PTablePanel extends JPanel{
@@ -10,14 +12,22 @@ public class PTablePanel extends JPanel{
         this.setBackground(Color.orange);
         this.setLayout(new BorderLayout());
 
-        // Create the student table panel
+        JButton editButton = new JButton("Edit");
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(editButton);
+        this.add(buttonPanel, BorderLayout.NORTH);
+        
         studentTable = new CStudentTable();
-
+        
         // Add it to your frame or panel
         this.add(studentTable, BorderLayout.CENTER);
 
-        // To refresh the data after adding a new student
         studentTable.refreshData();
+
+        editButton.addActionListener(e -> {
+            DEditStudentDialog dialog = new DEditStudentDialog(this);
+            dialog.setVisible(true);
+        });
     }  
     
     public void refreshTable() {
@@ -26,10 +36,6 @@ public class PTablePanel extends JPanel{
         }
     }
     
-    /**
-     * Returns the student table component
-     * @return The CStudentTable instance
-     */
     public CStudentTable getStudentTable() {
         return studentTable;
     }

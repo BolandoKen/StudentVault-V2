@@ -19,10 +19,8 @@ public class CButtons extends JButton {
     private static final String TABLE_ICON_DEFAULT = "assets/TableIcon.png";
     private static final String TABLE_ICON_SELECTED = "assets/SelectedTableIcon.png";
     
-    // Icon cache
     private static final Map<String, ImageIcon> iconCache = new HashMap<>();
     
-    // Button properties
     private final int cornerRadius;
     private Color backgroundColor;
     private Color hoverColor;
@@ -30,9 +28,6 @@ public class CButtons extends JButton {
     private Color textColor;
     private boolean isIconButton;
 
-    /**
-     * Default constructor with standard appearance
-     */
     public CButtons(String text) {
         this(text, DEFAULT_BACKGROUND, DEFAULT_TEXT_COLOR, DEFAULT_FONT, DEFAULT_CORNER_RADIUS, DEFAULT_SIZE);
     }
@@ -43,7 +38,7 @@ public class CButtons extends JButton {
 
     public CButtons(ImageIcon icon) {
         super(icon);
-        this.cornerRadius = 0; // Transparent background for icon buttons
+        this.cornerRadius = 0; 
         this.isIconButton = true;
         setupIconButton();
     }
@@ -193,11 +188,18 @@ public class CButtons extends JButton {
     }
 
 
-
-    //
+    //Cancel Button
     public static CButtons createCancelButton(){
         Color addButtonColor = new Color(0xE7E7E7); 
         CButtons button = new CButtons("Cancel", addButtonColor, Color.BLACK, 
+                                              new Font("Helvetica", Font.PLAIN, 18), 
+                                              DEFAULT_CORNER_RADIUS, DEFAULT_SIZE);
+        return button;
+    }
+
+    public static CButtons saveButton(){
+        Color addButtonColor = new Color(0x5C2434); 
+        CButtons button = new CButtons("Save", addButtonColor, Color.white, 
                                               new Font("Helvetica", Font.PLAIN, 18), 
                                               DEFAULT_CORNER_RADIUS, DEFAULT_SIZE);
         return button;
