@@ -281,4 +281,21 @@ public class CRoundedComboBox extends JComboBox<String> {
             super.paint(g, c);
         }
     }
+    public void resetToPlaceholder() {
+        if (getItemCount() > 0) {
+            setSelectedIndex(0);
+        }
+    }
+    
+    /**
+     * Static method to reset multiple combo boxes
+     */
+    public static void resetAllComboBoxes(CRoundedComboBox... comboBoxes) {
+        for (CRoundedComboBox comboBox : comboBoxes) {
+            if (comboBox != null) {
+                comboBox.resetToPlaceholder();
+            }
+        }
+    }
+    
 }

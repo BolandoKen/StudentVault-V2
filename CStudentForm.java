@@ -14,10 +14,18 @@ import javax.swing.JPanel;
 public class CStudentForm extends JPanel{
     private GUI parentFrame;
     private PTablePanel tablePanel;
+    private CRoundedTextField firstnameField;
+    private CRoundedTextField lastnameField;
+    private CRoundedTextField idField;
+    private CRoundedComboBox genderComboBox;
+    private CRoundedComboBox yearLevelComboBox;
+    private CRoundedComboBox collegeComboBox;
+    private CRoundedComboBox programComboBox;
 
-    public CStudentForm(GUI parentFrame, PTablePanel tablePanel, CButtons addButton, CButtons tableButton) {
+    public CStudentForm(GUI parentFrame, PTablePanel tablePanel, CButtons addButton, CButtons tableButton, CStudentForm studentForm) {
         this.parentFrame = parentFrame;
         this.tablePanel = tablePanel;
+        
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.white);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -46,11 +54,11 @@ public class CStudentForm extends JPanel{
         nameGbc.insets = new java.awt.Insets(5, 10, 5, 10);
 
         nameGbc.gridx = 0;
-        CRoundedTextField firstnameField = CRoundedTextField.createFirstNameField();
+        firstnameField = CRoundedTextField.createFirstNameField();
         nameRow.add(firstnameField, nameGbc);
 
         nameGbc.gridx = 1;
-        CRoundedTextField lastnameField = CRoundedTextField.createLastNameField();
+        lastnameField = CRoundedTextField.createLastNameField();
         nameRow.add(lastnameField, nameGbc);
         this.add(nameRow, gbc);
 
@@ -69,17 +77,17 @@ public class CStudentForm extends JPanel{
 
         //Gender Dropdown
         row2Gbc.gridx = 0;
-        CRoundedComboBox genderComboBox = CRoundedComboBox.createGenderComboBox();
+        genderComboBox = CRoundedComboBox.createGenderComboBox();
         row2.add(genderComboBox, row2Gbc);
 
         //Id TextField
         row2Gbc.gridx = 1;
-        CRoundedTextField idField = CRoundedTextField.createIdField();
+        idField = CRoundedTextField.createIdField();
         row2.add(idField, row2Gbc);
 
         //YearLevel Dropdown
         row2Gbc.gridx = 2;
-        CRoundedComboBox yearLevelComboBox = CRoundedComboBox.createYearLevelComboBox();
+        yearLevelComboBox = CRoundedComboBox.createYearLevelComboBox();
         row2.add(yearLevelComboBox, row2Gbc);
 
         this.add(row2, gbc);
@@ -101,7 +109,7 @@ public class CStudentForm extends JPanel{
         JPanel collegePanel = new JPanel(new BorderLayout());
         collegePanel.setOpaque(false);
 
-        CRoundedComboBox collegeComboBox = CRoundedComboBox.createCollegeCombobox();
+        collegeComboBox = CRoundedComboBox.createCollegeCombobox();
 
         JButton addCollegeButton = new JButton("+");
         addCollegeButton.setBackground(new Color(0xE7E7E7));
@@ -137,7 +145,7 @@ public class CStudentForm extends JPanel{
         JPanel programPanel = new JPanel(new BorderLayout());
         programPanel.setOpaque(false);
 
-        CRoundedComboBox programComboBox = new CRoundedComboBox(new String[0], "Program", new Dimension(300, 40));
+        programComboBox = new CRoundedComboBox(new String[0], "Program", new Dimension(300, 40));
 
         programPanel.add(programComboBox, BorderLayout.CENTER);
         row4.add(programPanel, row4Gbc);
@@ -182,7 +190,7 @@ public class CStudentForm extends JPanel{
         JPanel actionPanel = new JPanel(new BorderLayout());
         actionPanel.setBackground(Color.white);
 
-        CButtons addStudentButton = CButtons.createAddStudentButton(tablePanel.getStudentTable(), parentFrame, addButton, tableButton);
+        CButtons addStudentButton = CButtons.createAddStudentButton(tablePanel.getStudentTable(), parentFrame, addButton, tableButton, this);
         actionPanel.add(addStudentButton, BorderLayout.CENTER);
         row5.add(actionPanel, row5Gbc);
         this.add(row5, gbc);
@@ -207,8 +215,38 @@ public class CStudentForm extends JPanel{
         this.add(row6, gbc);
 
         cancelButton.addActionListener(e -> {
+            resetForm();
             parentFrame.switchPanel("TableCard");
         });
-
     } 
+    public void resetForm() {
+        System.out.println("Resetting form fields");
+        
+        // Reset text fields individually to ensure they're cleared
+        if (firstnameField != null) firstnameField.setText("");
+        if (lastnameField != null) lastnameField.setText("");
+        if (idField != null) idField.setText("");
+        
+        // Reset combo boxes to their default state
+        if (genderComboBox != null) genderComboBox.setSelectedIndex(0);
+        if (yearLevelComboBox != null) yearLevelComboBox.setSelectedIndex(0);
+        if (collegeComboBox != null) collegeComboBox.setSelectedIndex(0);
+        if (programComboBox != null) programComboBox.setSelectedIndex(0);
+        
+        // Try using the utility methods as a backup
+        try {
+            CRoundedTextField.clearAllFields(firstnameField, lastnameField, idField);
+            CRoundedComboBox.resetAllComboBoxes(genderComboBox, yearLevelComboBox, collegeComboBox, programComboBox);
+            System.out.println("Used utility methods to clear fields");
+        } catch (Exception e) {
+            System.out.println("Error in utility methods: " + e.getMessage());
+        }
+        
+        // Request focus on first field (better UX)
+        if (firstnameField != null) {
+            firstnameField.requestFocusInWindow();
+        }
+        
+        System.out.println("Form reset completed");
+    }
     }

@@ -129,16 +129,16 @@ public class CButtons extends JButton {
     }
     
     
-    public static CButtons createAddStudentButton(CStudentTable studentTable, GUI parentFrame, CButtons addButton, CButtons tableButton) {
+    public static CButtons createAddStudentButton(CStudentTable studentTable, GUI parentFrame, CButtons addButton, CButtons tableButton, CStudentForm studentForm) {
         Color addButtonColor = new Color(0x5C2434);  
         CButtons button = new CButtons("Add Student", addButtonColor, Color.WHITE, 
                                               new Font("Helvetica", Font.PLAIN, 18), 
                                               DEFAULT_CORNER_RADIUS, DEFAULT_SIZE);
 
         button.addActionListener(e -> {
+        // Debug statement to check if studentForm is null
+        System.out.println("StudentForm is " + (studentForm == null ? "NULL" : "NOT NULL"));
 
-
-        // Validate required fields
         if (!StudentDataManager.validateFields()) {
             JOptionPane.showMessageDialog(null, 
                 "Please fill in all required fields.", 
@@ -146,26 +146,41 @@ public class CButtons extends JButton {
                 JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        // Try to save data to database
         boolean success = StudentDataManager.saveStudent();
         
         if (success) {
-
-            updateButtonState(tableButton, addButton, tableButton);
+            // Try to reset the form BEFORE switching panels
+            if (studentForm != null) {
+                System.out.println("Calling resetForm on studentForm");
+                studentForm.resetForm();
+            } else {
+                System.out.println("Cannot reset form - studentForm is null");
+            }
+            
+            // Also try explicitly clearing specific fields as a backup
+            try {
+                CRoundedTextField.clearAllFields();  // No arguments version if available
+                CRoundedComboBox.resetAllComboBoxes(); // No arguments version if available
+                System.out.println("Attempted to clear fields directly");
+            } catch (Exception ex) {
+                System.out.println("Error clearing fields directly: " + ex.getMessage());
+            }
+            
             studentTable.refreshData();
-            parentFrame.switchPanel("TableCard");
-           
+            
+            // Show success message
             JOptionPane.showMessageDialog(null, 
                 "Student added successfully!", 
                 "Success", 
                 JOptionPane.INFORMATION_MESSAGE);
             
+            // Clear form data via StudentDataManager
             StudentDataManager.clearFormData();
-
-            System.out.println("Student added successfully - tableButton should be selected now");
+            System.out.println("StudentDataManager.clearFormData() called");
             
-            
+            // Switch panel AFTER resetting the form
+            parentFrame.switchPanel("TableCard");
+            System.out.println("Switched to TableCard");
         } else {
             JOptionPane.showMessageDialog(null, 
                 "Failed to add student. Please try again.", 
@@ -177,6 +192,9 @@ public class CButtons extends JButton {
     return button;
     }
 
+
+
+    //
     public static CButtons createCancelButton(){
         Color addButtonColor = new Color(0xE7E7E7); 
         CButtons button = new CButtons("Cancel", addButtonColor, Color.BLACK, 

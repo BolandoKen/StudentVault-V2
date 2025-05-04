@@ -11,6 +11,8 @@ import javax.swing.border.EmptyBorder;
 
 public class PAddStudentPanel extends JPanel {
     private GUI parentFrame;
+    private CStudentForm studentForm;
+
     public PAddStudentPanel(GUI parentFrame, PTablePanel tablePanel) {
         this.parentFrame = parentFrame;
         this.setLayout(new GridBagLayout());
@@ -46,7 +48,7 @@ public class PAddStudentPanel extends JPanel {
         formPanel.setLayout(new GridBagLayout());
         formPanel.setBackground(Color.white);
         
-        CStudentForm studentForm = new CStudentForm(parentFrame, tablePanel,null, null);
+        studentForm = new CStudentForm(parentFrame, tablePanel,null, null, null);
         formPanel.add(studentForm);
         
         JPanel wrapperPanel = new JPanel(new BorderLayout());
@@ -54,6 +56,8 @@ public class PAddStudentPanel extends JPanel {
         wrapperPanel.add(formPanel, BorderLayout.CENTER);
         bottomRow.add(wrapperPanel, BorderLayout.CENTER);
 
-
+    }
+    public CStudentForm getStudentForm() {
+        return studentForm;
     }
 }

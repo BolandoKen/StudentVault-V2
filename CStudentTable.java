@@ -31,7 +31,6 @@ public class CStudentTable extends JPanel {
         // Create table with the model
         table = new JTable(tableModel);
         
-        // Style the table
         table.setRowHeight(25);
         table.setFont(new Font("Helvetica", Font.PLAIN, 14));
         table.getTableHeader().setFont(new Font("Helvetica", Font.BOLD, 14));

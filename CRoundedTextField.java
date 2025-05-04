@@ -140,7 +140,7 @@ public class CRoundedTextField extends JTextField {
 
     //ID Field
     public static CRoundedTextField createIdField() {
-        CRoundedTextField idField = new CRoundedTextField("ID (0000-0000)", DEFAULT_SIZE);
+        CRoundedTextField idField = new CRoundedTextField("Id Number", DEFAULT_SIZE);
         
         // Add document filter to enforce ID format (0000-0000)
         ((javax.swing.text.PlainDocument) idField.getDocument()).setDocumentFilter(
@@ -241,4 +241,68 @@ public class CRoundedTextField extends JTextField {
     public String getInputText() {
         return showingPlaceholder ? "" : getText();
     }
+    /**
+ * Clears the text field content and resets to placeholder state
+ */
+public void clearField() {
+    setText(placeholder);
+    setForeground(placeholderColor);
+    showingPlaceholder = true;
+}
+
+/**
+ * Static method to clear all form fields
+ */
+public static void clearIdField(CRoundedTextField idField) {
+    // For ID field with document filter, we need special handling
+    if (idField != null) {
+        // Temporarily remove the document filter
+        javax.swing.text.AbstractDocument doc = (javax.swing.text.AbstractDocument) idField.getDocument();
+        javax.swing.text.DocumentFilter originalFilter = null;
+        
+        try {
+            // Use reflection to get the current document filter (there's no public API for this)
+            java.lang.reflect.Field field = javax.swing.text.AbstractDocument.class.getDeclaredField("documentFilter");
+            field.setAccessible(true);
+            originalFilter = (javax.swing.text.DocumentFilter) field.get(doc);
+            
+            // Temporarily set filter to null
+            doc.setDocumentFilter(null);
+            
+            // Clear and set placeholder
+            idField.setText("Id Number");
+            idField.setText(idField.placeholder);
+            idField.setForeground(idField.placeholderColor);
+            idField.showingPlaceholder = true;
+            
+        } catch (Exception e) {
+            // If reflection fails, fallback to standard method
+            idField.setText("Id Number");
+            idField.setText(idField.placeholder);
+            idField.setForeground(idField.placeholderColor);
+            idField.showingPlaceholder = true;
+        } finally {
+            // Restore the original filter
+            if (originalFilter != null) {
+                doc.setDocumentFilter(originalFilter);
+            }
+        }
+    }
+}
+
+/**
+ * Static method to clear all form fields with special handling for ID field
+ */
+public static void clearAllFields(CRoundedTextField... fields) {
+    for (CRoundedTextField field : fields) {
+        if (field != null) {
+            // Check if this is the ID field by looking at the placeholder
+            if (field.placeholder != null && field.placeholder.contains("ID")) {
+                clearIdField(field);
+            } else {
+                field.clearField();
+            }
+        }
+    }
+}
 }
