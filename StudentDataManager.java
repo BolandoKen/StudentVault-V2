@@ -3,6 +3,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * Class to manage student data and handle database operations
@@ -81,6 +82,69 @@ public class StudentDataManager {
             return false;
         }
     }
+
+    /**
+ * Retrieves student information from the database based on student ID
+ * @param studentId The ID number of the student to retrieve
+ * @return true if student found and data loaded, false otherwise
+ */
+public static boolean getStudentById(String studentId) {
+    try (Connection conn = getConnection()) {
+        String sql = "SELECT first_name, last_name, gender, id_number, year_level, college_id, program_id " +
+                     "FROM students WHERE id_number = ?";
+        
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, studentId);
+        
+        var resultSet = pstmt.executeQuery();
+        
+        if (resultSet.next()) {
+            // Load the retrieved data into the static fields
+            firstName = resultSet.getString("first_name");
+            lastName = resultSet.getString("last_name");
+            gender = resultSet.getString("gender");
+            idNumber = resultSet.getString("id_number");
+            yearLevel = resultSet.getString("year_level");
+            collegeId = resultSet.getInt("college_id");
+            programId = resultSet.getInt("program_id");
+            
+            return true; // Student found and data loaded
+        } else {
+            return false; // Student not found
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+/**
+ * Updates existing student information in the database
+ * @param studentId The ID number of the student to update
+ * @return true if update successful, false otherwise
+ */
+public static boolean updateStudent(String studentId) {
+    try (Connection conn = getConnection()) {
+        String sql = "UPDATE students SET first_name = ?, last_name = ?, gender = ?, " +
+                     "year_level = ?, college_id = ?, program_id = ? WHERE id_number = ?";
+        
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, firstName);
+        pstmt.setString(2, lastName);
+        pstmt.setString(3, gender);
+        pstmt.setString(4, yearLevel);
+        pstmt.setInt(5, collegeId);
+        pstmt.setInt(6, programId);
+        pstmt.setString(7, studentId);
+        
+        int rowsAffected = pstmt.executeUpdate();
+        
+        return rowsAffected > 0;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
     
     /**
      * Check if all required fields are filled
@@ -108,4 +172,107 @@ public class StudentDataManager {
         collegeId = null;
         programId = null;
     }
+    public static boolean loadStudentAndSetComboBoxes(String studentId, 
+                                                  CRoundedComboBox collegeComboBox, 
+                                                  CRoundedComboBox programComboBox) {
+    // First retrieve the student data
+    boolean studentFound = StudentDataManager.getStudentById(studentId);
+    
+    if (!studentFound) {
+        return false; // Student not found
+    }
+    
+    // Get the college and program IDs from the retrieved student data
+    Integer collegeId = StudentDataManager.getCollegeId();
+    Integer programId = StudentDataManager.getProgramId();
+    
+    if (collegeId == null || programId == null) {
+        return false; // Invalid data
+    }
+    
+    // Set the college ComboBox
+    boolean collegeFound = false;
+    String collegeName = null;
+    
+    // Find the college name by ID
+    for (Map.Entry<String, Integer> entry : CRoundedComboBox.collegeMap.entrySet()) {
+        if (entry.getValue().equals(collegeId)) {
+            collegeName = entry.getKey();
+            collegeFound = true;
+            break;
+        }
+    }
+    
+    if (!collegeFound || collegeName == null) {
+        return false; // College not found
+    }
+    
+    // Set the college ComboBox selection
+    for (int i = 0; i < collegeComboBox.getItemCount(); i++) {
+        String item = collegeComboBox.getItemAt(i);
+        if (collegeName.equals(item)) {
+            collegeComboBox.setSelectedIndex(i);
+            break;
+        }
+    }
+    
+    // Create/Update the program ComboBox based on the college ID
+    CRoundedComboBox updatedProgramComboBox = CRoundedComboBox.createProgramComboBox(collegeId);
+    
+    // Replace all items in the existing programComboBox with items from updatedProgramComboBox
+    programComboBox.removeAllItems();
+    for (int i = 0; i < updatedProgramComboBox.getItemCount(); i++) {
+        programComboBox.addItem(updatedProgramComboBox.getItemAt(i));
+    }
+    
+    // Find the program name by ID and set the selection
+    try {
+        Connection conn = StudentDataManager.getConnection();
+        
+        // Check if we have programs or pragrams table
+        boolean programsExists = false;
+        boolean pragramsExists = false;
+        
+        ResultSet tables = conn.getMetaData().getTables(null, null, "%", null);
+        while (tables.next()) {
+            String tableName = tables.getString("TABLE_NAME");
+            if (tableName.equalsIgnoreCase("programs")) {
+                programsExists = true;
+            } else if (tableName.equalsIgnoreCase("pragrams")) {
+                pragramsExists = true;
+            }
+        }
+        
+        String tableName = programsExists ? "programs" : (pragramsExists ? "pragrams" : "programs");
+        
+        // Get program name by ID
+        String sql = "SELECT program_name FROM " + tableName + " WHERE program_id = ?";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, programId);
+        
+        ResultSet rs = pstmt.executeQuery();
+        
+        if (rs.next()) {
+            String programName = rs.getString("program_name");
+            
+            // Set the program ComboBox selection
+            for (int i = 0; i < programComboBox.getItemCount(); i++) {
+                String item = programComboBox.getItemAt(i);
+                if (programName.equals(item)) {
+                    programComboBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        
+        rs.close();
+        pstmt.close();
+        conn.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+    
+    return true;
+}
 }

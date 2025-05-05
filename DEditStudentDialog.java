@@ -9,12 +9,11 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class DEditStudentDialog extends JDialog{
 
-    private GUI parentFrame;
-    private PTablePanel tablePanel;
     private CRoundedTextField firstnameField;
     private CRoundedTextField lastnameField;
     private CRoundedTextField idField;
@@ -23,9 +22,12 @@ public class DEditStudentDialog extends JDialog{
     private CRoundedComboBox collegeComboBox;
     private CRoundedComboBox programComboBox;
 
-    public DEditStudentDialog(JPanel parent){
-        super(); // call JDialog constructor
+    public DEditStudentDialog(JPanel parent, String idNumber, CStudentTable studentTable) {
+        super(); 
         this.getContentPane().setBackground(Color.white);
+        StudentDataManager.getStudentById(idNumber);
+
+        
 
         JPanel formPanel = new JPanel();
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -39,7 +41,7 @@ public class DEditStudentDialog extends JDialog{
         JPanel additionalInfoPanel = new JPanel(new GridBagLayout());
         additionalInfoPanel.setBackground(Color.white);
 
-        JLabel titleLabel = new JLabel("Add New Student");
+        JLabel titleLabel = new JLabel("Edit Student");
         titleLabel.setFont(new Font("Helvetica", Font.BOLD, 32));
         additionalInfoPanel.add(titleLabel);
         formPanel.add(additionalInfoPanel, gbc);
@@ -93,6 +95,11 @@ public class DEditStudentDialog extends JDialog{
         row2.add(yearLevelComboBox, row2Gbc);
 
         formPanel.add(row2, gbc);
+
+        firstnameField.setText(StudentDataManager.getFirstName());
+        lastnameField.setText(StudentDataManager.getLastName());
+        idField.setText(idNumber);
+        idField.setEditable(false);
 
         //Collage Row
         gbc.gridy = 3;
@@ -150,6 +157,11 @@ public class DEditStudentDialog extends JDialog{
         row4.add(programPanel, row4Gbc);
         formPanel.add(row4, gbc);
 
+        StudentDataManager.loadStudentAndSetComboBoxes(idNumber, collegeComboBox, programComboBox);
+
+        setComboBoxSelection(genderComboBox, StudentDataManager.getGender());
+        setComboBoxSelection(yearLevelComboBox, StudentDataManager.getYearLevel());
+        
         collegeComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 // Get the selected college
@@ -189,6 +201,36 @@ public class DEditStudentDialog extends JDialog{
         actionPanel.setBackground(Color.white);
 
         CButtons saveButton = CButtons.saveButton();
+
+        saveButton.addActionListener(e -> {
+        if (!StudentDataManager.validateFields()) {
+            JOptionPane.showMessageDialog(null, 
+                "Please fill in all required fields.", 
+                "Missing Information", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        boolean success = StudentDataManager.updateStudent(idNumber);
+        
+        if (success) {
+
+            studentTable.refreshData();
+            
+            // Show success message
+            JOptionPane.showMessageDialog(null, 
+                "Student added successfully!", 
+                "Success", 
+                JOptionPane.INFORMATION_MESSAGE);
+            
+        } else {
+            JOptionPane.showMessageDialog(null, 
+                "Failed to add student. Please try again.", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+        this.dispose();
+    });
+  
         actionPanel.add(saveButton, BorderLayout.CENTER);
         row5.add(actionPanel, row5Gbc);
         formPanel.add(row5, gbc);
@@ -204,16 +246,29 @@ public class DEditStudentDialog extends JDialog{
         row6Gbc.weightx = 1; 
         row6Gbc.insets = new java.awt.Insets(5, 10, 5, 10);
 
-        JPanel cancelPanel = new JPanel(new BorderLayout());
-        cancelPanel.setBackground(Color.white);
+     
         CButtons cancelButton = CButtons.createCancelButton();
-        cancelPanel.add(cancelButton, BorderLayout.CENTER);
-        row6.add(cancelPanel, row6Gbc);
+        cancelButton.requestFocusInWindow();
+    
+        row6.add(cancelButton, row6Gbc);
         formPanel.add(row6, gbc);
 
         this.add(formPanel, BorderLayout.CENTER);
         pack();
         setLocationRelativeTo(parent);
 
-    } 
+        cancelButton.addActionListener(e -> {
+            this.dispose();
+        });
+    }
+    private void setComboBoxSelection(CRoundedComboBox comboBox, String value) {
+        if (value != null) {
+            for (int i = 0; i < comboBox.getItemCount(); i++) {
+                if (value.equals(comboBox.getItemAt(i))) {
+                    comboBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+    }
 }
