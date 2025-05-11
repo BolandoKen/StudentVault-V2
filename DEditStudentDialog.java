@@ -27,8 +27,6 @@ public class DEditStudentDialog extends JDialog{
         this.getContentPane().setBackground(Color.white);
         StudentDataManager.getStudentById(idNumber);
 
-        
-
         JPanel formPanel = new JPanel();
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         formPanel.setBackground(Color.white);
@@ -59,6 +57,7 @@ public class DEditStudentDialog extends JDialog{
 
         nameGbc.gridx = 0;
         firstnameField = CRoundedTextField.createFirstNameField();
+
         nameRow.add(firstnameField, nameGbc);
 
         nameGbc.gridx = 1;

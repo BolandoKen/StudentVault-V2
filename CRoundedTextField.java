@@ -12,6 +12,7 @@ public class CRoundedTextField extends JTextField {
     private static final Font DEFAULT_FONT = new Font("Helvetica", Font.PLAIN, 18);
     private static final Dimension DEFAULT_SIZE = new Dimension(130, 30);
     private static final Dimension NAME_FIELD_SIZE = new Dimension(180, 40);
+    private static final Dimension SEARCH_FIELD_SIZE = new Dimension(200,10);
     
     private int cornerRadius;
     private String placeholder;
@@ -218,6 +219,13 @@ public class CRoundedTextField extends JTextField {
         
         return idField;
     }
+
+    public static CRoundedTextField createSearchField() {
+        CRoundedTextField searchField = new CRoundedTextField("Search", SEARCH_FIELD_SIZE);
+
+        return searchField;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();

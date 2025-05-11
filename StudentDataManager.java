@@ -159,6 +159,27 @@ public static boolean updateStudent(String studentId) {
                collegeId != null &&
                programId != null;
     }
+
+    /**
+     * Deletes a student from the database based on student ID
+     * @param studentId The ID number of the student to delete
+     * @return true if deletion successful, false otherwise
+     */
+    public static boolean deleteStudent(String studentId) {
+        try (Connection conn = getConnection()) {
+            String sql = "DELETE FROM students WHERE id_number = ?";
+            
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, studentId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     
     /**
      * Clear all form data

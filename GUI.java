@@ -1,75 +1,140 @@
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import javax.swing.*;
 
 public class GUI extends JFrame {
-    private final CardLayout cardLayout = new CardLayout();
-    private final JPanel rightContainer;
+    private final CardLayout cardLayout;
+    private final JPanel cardPanel;
+    private final PSearchPanel searchPanel;
+    private final PAddStudentPanel addStudentPanel;
+    private final PTablePanel tablePanel;
+    private final PCollegeTablePanel collegeTablePanel;
+    private final PProgramTablePanel programTablePanel;
     
     public GUI() {
-        this.setTitle("StudentVault");
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(1440, 1024);
-        ImageIcon studentVaultLogo = new ImageIcon("Assets/StudentVaultLogo.png");
-        this.setIconImage(studentVaultLogo.getImage());
+        // Frame settings
+        setTitle("Student Vault");
+        setSize(1440, 1024);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        JPanel mainBackground = new JPanel(new GridBagLayout());
-        mainBackground.setBackground(Color.RED);
-
+        // Set icon
+        ImageIcon studentVaultLogo = new ImageIcon("Assets/StudentVaultLogo.png");
+        setIconImage(studentVaultLogo.getImage());
+        
+        // Main background panel
+        JPanel background = new JPanel(new GridBagLayout());
+        background.setBackground(new Color(0x5C2434));
+        
+        // Card layout setup
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel(cardLayout);
+        cardPanel.setBackground(new Color(0xE7E7E7));
+        
+        // Create table panels
+        tablePanel = new PTablePanel();
+        collegeTablePanel = new PCollegeTablePanel();
+        //programTablePanel = new ProgramTablePanel();
+        
+        // Create the main table view with search panel
+        JPanel tableView = new JPanel(new GridBagLayout());
+        tableView.setBackground(new Color(0xE7E7E7));
+        
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
-
-        gbc.weighty = 1;
-        gbc.weightx = 0;
-        gbc.gridx = 0;
+        gbc.weightx = 1.0;
+        
+        // Add search panel
+        searchPanel = new PSearchPanel();
+        //searchPanel.setTablePanel(tablePanel);
+        
+        gbc.gridy = 0;
+        gbc.weighty = 0.02;
+        tableView.add(searchPanel, gbc);
+        
+        // Add table with scroll pane
+        JScrollPane tableScrollPane = new JScrollPane(tablePanel);
+        tableScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        tableScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        tableScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+        tableScrollPane.getViewport().setBackground(new Color(0xE7E7E7));
+        tableScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        
+        gbc.gridy = 1;
+        gbc.weighty = 0.98;
+        tableView.add(tableScrollPane, gbc);
+        
+        // Create add student panel
+        addStudentPanel = new PAddStudentPanel(this, tablePanel);
+        this.programTablePanel = new PProgramTablePanel();
+        
+        // Add all panels to card layout
+        cardPanel.add(tableView, "TABLE");
+        cardPanel.add(addStudentPanel, "ADD_STUDENT");
+        cardPanel.add(collegeTablePanel, "COLLEGETABLEPANEL");
+        cardPanel.add(programTablePanel, "PROGRAMTABLEPANEL");
+        
+        // Create side panel
         PSidePanel sidePanel = new PSidePanel(this);
-        mainBackground.add(sidePanel, gbc);
-
-        gbc.weightx = 1;
-        gbc.gridx = 1;
-        rightContainer = new JPanel(cardLayout);
-        mainBackground.add(rightContainer, gbc);
         
-        JPanel tableCard = new JPanel(new GridBagLayout());
-        GridBagConstraints tableCardGBC = new GridBagConstraints();
-        tableCardGBC.fill = GridBagConstraints.BOTH;
+        // Layout setup
+        GridBagConstraints mainGbc = new GridBagConstraints();
+        mainGbc.fill = GridBagConstraints.BOTH;
+        mainGbc.weighty = 1.0;
         
-        tableCardGBC.weighty = 0;
-        tableCardGBC.weightx = 1;
-        tableCardGBC.gridy = 0;
-        PSearchPanel searchPanel = new PSearchPanel();
-        tableCard.add(searchPanel, tableCardGBC);
-
-        tableCardGBC.weighty = 1;
-        tableCardGBC.gridy = 1;
-        PTablePanel tablePanel = new PTablePanel();
-        tableCard.add(tablePanel, tableCardGBC);
-
-        JPanel addStudentCard = new JPanel(new BorderLayout());
-        PAddStudentPanel addStudentPanel = new PAddStudentPanel(this, tablePanel);
-        addStudentCard.add(addStudentPanel);
-
-        rightContainer.add(tableCard, "TableCard");
-        rightContainer.add(addStudentCard, "AddStudentCard");
-
-        this.add(mainBackground);
-        this.setVisible(true);
+        mainGbc.gridx = 0;
+        mainGbc.weightx = 0.05;
+        background.add(sidePanel, mainGbc);
+        
+        mainGbc.gridx = 1;
+        mainGbc.weightx = 0.95;
+        background.add(cardPanel, mainGbc);
+        
+        add(background);
+        setVisible(true);
     }
     
     public void switchPanel(String panelName) {
-        cardLayout.show(rightContainer, panelName);
+        // Refresh data before showing the panel if needed
+        switch (panelName) {
+            case "TABLE":
+             
+                break;
+            case "COLLEGETABLEPANEL":
+               
+                break;
+            case "PROGRAMTABLEPANEL":
+               
+                break;
+        }
+        cardLayout.show(cardPanel, panelName);
     }
-
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        
         SwingUtilities.invokeLater(() -> new GUI());
     }
+    
+    // Getter methods for accessing panels if needed
+    /* 
+    public CollegeTablePanel getCollegeTablePanel() {
+        return collegeTablePanel;
+    }
+    
+    public ProgramTablePanel getProgramTablePanel() {
+        return programTablePanel;
+    }
+    
+    public TablePanel getTablePanel() {
+        return tablePanel;
+    }
+    public ProgramsFilterDialog getProgramsFilterDialog() {
+        if (programTablePanel != null) {
+            return programTablePanel.getFilterDialog(); // You'll need to add this getter
+        }
+        return null;
+    }
+    */
 }
