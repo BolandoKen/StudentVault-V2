@@ -5,16 +5,16 @@ public class Dialogs {
     // Remove the private constructor as it's not needed
     // private Dialogs() { ... }
 
-    public static void editCollegeDialog(int college_Id, CCollegeTable collegeTable) {
+    public static void editCollegeDialog(String collegeCode, CCollegeTable collegeTable) {
         JDialog dialog = new JDialog();
         dialog.setTitle("Edit College");
         dialog.setLayout(new FlowLayout());
         
         JTextField collegeNameField = new JTextField(20);
-        collegeNameField.setText(CollegeDataManager.getCollegeName(college_Id));
+        collegeNameField.setText(CollegeDataManager.getCollegeName(collegeCode));
 
         JTextField collegeCodeField = new JTextField(20);
-        collegeCodeField.setText(CollegeDataManager.getCollegeCode(college_Id));
+        collegeCodeField.setText(collegeCode);
 
         dialog.add(new JLabel("College Name:"));
         dialog.add(collegeNameField);
@@ -26,12 +26,19 @@ public class Dialogs {
 
         saveButton.addActionListener(e -> {
             String collegeName = collegeNameField.getText();
-            String collegeCode = collegeCodeField.getText();
-            CollegeDataManager.updateCollege(college_Id, collegeName, collegeCode);
-            collegeTable.refreshTable();
-            dialog.dispose();
+            String newCollegeCode = collegeCodeField.getText();
+            
+            if (!CollegeDataManager.updateCollege(collegeCode, collegeName, newCollegeCode)) {
+                JOptionPane.showMessageDialog(dialog, 
+                    "Failed to update college", 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            } else {
+                collegeTable.refreshTable();
+                dialog.dispose();
+            }
         });
-
+        
         cancelButton.addActionListener(e -> dialog.dispose());
 
         dialog.add(saveButton);

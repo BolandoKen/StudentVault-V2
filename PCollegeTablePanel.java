@@ -81,8 +81,8 @@ public final class PCollegeTablePanel extends JPanel {
             if (selectedRow != -1) {
                 Object idValue = table.getValueAt(selectedRow, 0);
                 if (idValue != null) {
-                    int collegeId = Integer.parseInt(idValue.toString());
-                    Dialogs.editCollegeDialog(collegeId, collegeTable); // Make sure this line exists
+                    String collegeCode = idValue.toString();
+                    Dialogs.editCollegeDialog(collegeCode, collegeTable); 
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Please select a college to edit.", "No Selection", JOptionPane.WARNING_MESSAGE);

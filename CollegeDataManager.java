@@ -18,7 +18,6 @@ public class CollegeDataManager {
     // College form data
     private static String collegeName;
     private static String collegeCode;
-    private static Integer collegeId;
     
     // Getters and setters
     public static void setCollegeName(String value) { collegeName = value; }
@@ -26,9 +25,6 @@ public class CollegeDataManager {
     
     public static void setCollegeCode(String value) { collegeCode = value; }
     public static String getCollegeCode() { return collegeCode; }
-    
-    public static void setCollegeId(Integer value) { collegeId = value; }
-    public static Integer getCollegeId() { return collegeId; }
     
     /**
      * Create a database connection
@@ -63,22 +59,21 @@ public class CollegeDataManager {
     }
     
     /**
-     * Retrieves college information from the database based on college ID
-     * @param id The ID of the college to retrieve
+     * Retrieves college information from the database based on college code
+     * @param code The code of the college to retrieve
      * @return true if college found and data loaded, false otherwise
      */
-    public static boolean getCollegeById(int id) {
+    public static boolean getCollegeByCode(String code) {
         try (Connection conn = getConnection()) {
-            String sql = "SELECT college_id, college_name, college_code FROM colleges WHERE college_id = ?";
+            String sql = "SELECT college_name, college_code FROM colleges WHERE college_code = ?";
             
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, id);
+            pstmt.setString(1, code);
             
             ResultSet resultSet = pstmt.executeQuery();
             
             if (resultSet.next()) {
                 // Load the retrieved data into the static fields
-                collegeId = resultSet.getInt("college_id");
                 collegeName = resultSet.getString("college_name");
                 collegeCode = resultSet.getString("college_code");
                 
@@ -94,17 +89,19 @@ public class CollegeDataManager {
     
     /**
      * Updates existing college information in the database
-     * @param id The ID of the college to update
+     * @param oldCode The current code of the college to update
+     * @param newName The new name for the college
+     * @param newCode The new code for the college
      * @return true if update successful, false otherwise
      */
-    public static boolean updateCollege(int id, String collegeName, String collegeCode) {
+    public static boolean updateCollege(String oldCode, String newName, String newCode) {
         try (Connection conn = getConnection()) {
-            String sql = "UPDATE colleges SET college_name = ?, college_code = ? WHERE college_id = ?";
+            String sql = "UPDATE colleges SET college_name = ?, college_code = ? WHERE college_code = ?";
             
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, collegeName);
-            pstmt.setString(2, collegeCode);
-            pstmt.setInt(3, id);
+            pstmt.setString(1, newName);
+            pstmt.setString(2, newCode);
+            pstmt.setString(3, oldCode);
             
             int rowsAffected = pstmt.executeUpdate();
             
@@ -116,15 +113,15 @@ public class CollegeDataManager {
     }
     
     /**
-     * Retrieves the name of a college based on its ID
-     * @param id The ID of the college
+     * Retrieves the name of a college based on its code
+     * @param code The code of the college
      * @return The name of the college, or null if not found
      */
-    public static String getCollegeName(int id) {
+    public static String getCollegeName(String code) {
         try (Connection conn = getConnection()) {
-            String sql = "SELECT college_name FROM colleges WHERE college_id = ?";
+            String sql = "SELECT college_name FROM colleges WHERE college_code = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, id);
+            pstmt.setString(1, code);
             
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -135,26 +132,7 @@ public class CollegeDataManager {
         }
         return null;
     }
-    /**
-     * Retrieves the code of a college based on its ID
-     * @param id The ID of the college
-     * @return The code of the college, or null if not found
-     */
-    public static String getCollegeCode(int id) {
-        try (Connection conn = getConnection()) {
-            String sql = "SELECT college_code FROM colleges WHERE college_id = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, id);
-            
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getString("college_code");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+    
     /**
      * Check if all required fields are filled
      * @return true if all fields have values, false otherwise
@@ -165,16 +143,16 @@ public class CollegeDataManager {
     }
     
     /**
-     * Deletes a college from the database based on college ID
-     * @param id The ID of the college to delete
+     * Deletes a college from the database based on college code
+     * @param code The code of the college to delete
      * @return true if deletion successful, false otherwise
      */
-    public static boolean deleteCollege(int id) {
+    public static boolean deleteCollege(String code) {
         try (Connection conn = getConnection()) {
-            String sql = "DELETE FROM colleges WHERE college_id = ?";
+            String sql = "DELETE FROM colleges WHERE college_code = ?";
             
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, id);
+            pstmt.setString(1, code);
             
             int rowsAffected = pstmt.executeUpdate();
             
@@ -191,25 +169,24 @@ public class CollegeDataManager {
     public static void clearFormData() {
         collegeName = null;
         collegeCode = null;
-        collegeId = null;
     }
     
     /**
-     * Loads all colleges into a map (id -> name)
-     * @return Map of college IDs to names
+     * Loads all colleges into a map (code -> name)
+     * @return Map of college codes to names
      */
-    public static Map<Integer, String> loadCollegeMap() {
-        Map<Integer, String> collegeMap = new HashMap<>();
+    public static Map<String, String> loadCollegeMap() {
+        Map<String, String> collegeMap = new HashMap<>();
         
         try (Connection conn = getConnection()) {
-            String sql = "SELECT college_id, college_name FROM colleges";
+            String sql = "SELECT college_code, college_name FROM colleges";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                int id = rs.getInt("college_id");
+                String code = rs.getString("college_code");
                 String name = rs.getString("college_name");
-                collegeMap.put(id, name);
+                collegeMap.put(code, name);
             }
         } catch (Exception e) {
             e.printStackTrace();
