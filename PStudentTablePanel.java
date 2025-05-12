@@ -7,11 +7,11 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
-public class PTablePanel extends JPanel{
+public class PStudentTablePanel extends JPanel{
 
     private CStudentTable studentTable;
 
-    public PTablePanel() {
+    public PStudentTablePanel() {
         this.setBackground(Color.orange);
         this.setLayout(new BorderLayout());
 

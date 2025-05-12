@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 
 public class CStudentForm extends JPanel{
     private GUI parentFrame;
-    private PTablePanel tablePanel;
+    private PStudentTablePanel tablePanel;
     private CRoundedTextField firstnameField;
     private CRoundedTextField lastnameField;
     private CRoundedTextField idField;
@@ -22,7 +22,7 @@ public class CStudentForm extends JPanel{
     private CRoundedComboBox collegeComboBox;
     private CRoundedComboBox programComboBox;
 
-    public CStudentForm(GUI parentFrame, PTablePanel tablePanel, CButtons addButton, CButtons tableButton, CStudentForm studentForm) {
+    public CStudentForm(GUI parentFrame, PStudentTablePanel tablePanel, CButtons addButton, CButtons tableButton, CStudentForm studentForm) {
         this.parentFrame = parentFrame;
         this.tablePanel = tablePanel;
         

@@ -87,30 +87,91 @@ public class CollegeDataManager {
         }
     }
     
-    /**
-     * Updates existing college information in the database
-     * @param oldCode The current code of the college to update
-     * @param newName The new name for the college
-     * @param newCode The new code for the college
-     * @return true if update successful, false otherwise
-     */
-    public static boolean updateCollege(String oldCode, String newName, String newCode) {
-        try (Connection conn = getConnection()) {
-            String sql = "UPDATE colleges SET college_name = ?, college_code = ? WHERE college_code = ?";
-            
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, newName);
-            pstmt.setString(2, newCode);
-            pstmt.setString(3, oldCode);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            return rowsAffected > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+  
+/**
+ * Updates existing college information in the database
+ * @param oldCode The current code of the college to update
+ * @param newName The new name for the college
+ * @param newCode The new code for the college
+ * @return boolean indicating whether the update was successful
+ */
+public static boolean updateCollege(String oldCode, String newName, String newCode) {
+    Connection conn = null;
+    try {
+        conn = getConnection();
+        // Start a transaction
+        conn.setAutoCommit(false);
+        
+        // First, ensure the new college code exists
+        // If it doesn't exist, insert a new college record
+        String checkCollegeSql = "SELECT COUNT(*) FROM colleges WHERE college_code = ?";
+        PreparedStatement checkStmt = conn.prepareStatement(checkCollegeSql);
+        checkStmt.setString(1, newCode);
+        ResultSet rs = checkStmt.executeQuery();
+        
+        boolean newCodeExists = false;
+        if (rs.next()) {
+            newCodeExists = rs.getInt(1) > 0;
+        }
+        
+        // If new code doesn't exist, insert a new college record
+        if (!newCodeExists) {
+            String insertCollegeSql = "INSERT INTO colleges (college_code, college_name) VALUES (?, ?)";
+            PreparedStatement insertStmt = conn.prepareStatement(insertCollegeSql);
+            insertStmt.setString(1, newCode);
+            insertStmt.setString(2, newName);
+            insertStmt.executeUpdate();
+        }
+        
+        // Update programs to use the new college code
+        String updateProgramsSql = "UPDATE programs SET college_code = ? WHERE college_code = ?";
+        PreparedStatement updateProgramsStmt = conn.prepareStatement(updateProgramsSql);
+        updateProgramsStmt.setString(1, newCode);
+        updateProgramsStmt.setString(2, oldCode);
+        updateProgramsStmt.executeUpdate();
+        
+        // Update the college name for the new code
+        String updateCollegeSql = "UPDATE colleges SET college_name = ? WHERE college_code = ?";
+        PreparedStatement updateCollegeStmt = conn.prepareStatement(updateCollegeSql);
+        updateCollegeStmt.setString(1, newName);
+        updateCollegeStmt.setString(2, newCode);
+        int collegeRowsAffected = updateCollegeStmt.executeUpdate();
+        
+        // If the old code is different from the new code, delete the old college record
+        if (!oldCode.equals(newCode)) {
+            String deleteOldCollegeSql = "DELETE FROM colleges WHERE college_code = ?";
+            PreparedStatement deleteStmt = conn.prepareStatement(deleteOldCollegeSql);
+            deleteStmt.setString(1, oldCode);
+            deleteStmt.executeUpdate();
+        }
+        
+        // Commit the transaction
+        conn.commit();
+        
+        return collegeRowsAffected > 0;
+    } catch (Exception e) {
+        // Rollback in case of any error
+        if (conn != null) {
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+        }
+        e.printStackTrace();
+        return false;
+    } finally {
+        // Reset to default commit behavior
+        if (conn != null) {
+            try {
+                conn.setAutoCommit(true);
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
+}
     
     /**
      * Retrieves the name of a college based on its code

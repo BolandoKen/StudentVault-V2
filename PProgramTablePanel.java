@@ -116,5 +116,11 @@ public final class PProgramTablePanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(programTable);
         bottomRow.add(scrollPane, BorderLayout.CENTER);
     }
-   
+   /**
+ * Returns the CProgramTable associated with this panel
+ * @return The CProgramTable instance
+ */
+public CProgramTable getProgramTable() {
+    return programTable;
+}
 }

@@ -13,7 +13,7 @@ public class PAddStudentPanel extends JPanel {
     private GUI parentFrame;
     private CStudentForm studentForm;
 
-    public PAddStudentPanel(GUI parentFrame, PTablePanel tablePanel) {
+    public PAddStudentPanel(GUI parentFrame, PStudentTablePanel tablePanel) {
         this.parentFrame = parentFrame;
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.white);

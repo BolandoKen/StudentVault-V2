@@ -6,9 +6,10 @@ public class GUI extends JFrame {
     private final JPanel cardPanel;
     private final PSearchPanel searchPanel;
     private final PAddStudentPanel addStudentPanel;
-    private final PTablePanel tablePanel;
+    private final PStudentTablePanel tablePanel;
     private final PCollegeTablePanel collegeTablePanel;
     private final PProgramTablePanel programTablePanel;
+    private final CProgramTable programTable = null;
     
     public GUI() {
         // Frame settings
@@ -30,7 +31,7 @@ public class GUI extends JFrame {
         cardPanel.setBackground(new Color(0xE7E7E7));
         
         // Create table panels
-        tablePanel = new PTablePanel();
+        tablePanel = new PStudentTablePanel();
         collegeTablePanel = new PCollegeTablePanel();
         //programTablePanel = new ProgramTablePanel();
         
@@ -102,7 +103,7 @@ public class GUI extends JFrame {
                
                 break;
             case "PROGRAMTABLEPANEL":
-               
+                programTablePanel.getProgramTable().refreshData();
                 break;
         }
         cardLayout.show(cardPanel, panelName);
@@ -118,23 +119,14 @@ public class GUI extends JFrame {
     }
     
     // Getter methods for accessing panels if needed
-    /* 
-    public CollegeTablePanel getCollegeTablePanel() {
+    
+    public PCollegeTablePanel getCollegeTablePanel() {
         return collegeTablePanel;
     }
     
-    public ProgramTablePanel getProgramTablePanel() {
+    public PProgramTablePanel getProgramTablePanel() {
         return programTablePanel;
     }
     
-    public TablePanel getTablePanel() {
-        return tablePanel;
-    }
-    public ProgramsFilterDialog getProgramsFilterDialog() {
-        if (programTablePanel != null) {
-            return programTablePanel.getFilterDialog(); // You'll need to add this getter
-        }
-        return null;
-    }
-    */
+    
 }
