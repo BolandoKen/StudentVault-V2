@@ -87,8 +87,62 @@ public class CollegeDataManager {
         }
     }
     
-  
-/**
+    /**
+     * Adds a new college to the database
+     * @param name The name of the college
+     * @param code The unique code for the college
+     * @return An integer representing the result of the operation:
+     *         1 - College added successfully
+     *         0 - College code already exists
+     *         -1 - College name already exists
+     *         -2 - Invalid input (empty name or code)
+     *         -3 - Database error occurred
+     */
+    public static boolean addCollege(String name, String code) {
+        // Validate input
+        if (name == null || name.trim().isEmpty() || 
+            code == null || code.trim().isEmpty()) {
+            return false; // Invalid input
+        }
+
+        // Trim the input to remove any leading/trailing whitespace
+        name = name.trim();
+        code = code.trim();
+
+        // Check if college code already exists
+        if (collegeCodeExists(code)) {
+            return false; // College code already exists
+        }
+
+        // Check if college name already exists
+        if (collegeNameExists(name)) {
+            return false; // College name already exists
+        }
+
+        // Attempt to save the college
+        try (Connection conn = getConnection()) {
+            String sql = "INSERT INTO colleges (college_name, college_code) VALUES (?, ?)";
+            
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, name);
+            pstmt.setString(2, code);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                // Successfully added - also update static fields
+                collegeName = name;
+                collegeCode = code;
+                return true; // Success
+            } else {
+                return false; // Database error
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false; // Database error
+        }
+    }
+    /* 
  * Updates existing college information in the database
  * @param oldCode The current code of the college to update
  * @param newName The new name for the college

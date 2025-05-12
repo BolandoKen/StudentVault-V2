@@ -3,6 +3,80 @@ import java.awt.GridLayout;
 import javax.swing.*;
 
 public class Dialogs {
+
+    public static void addCollegeDialog(CCollegeTable collegeTable) {
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Add New College");
+        dialog.setLayout(new GridLayout(3, 2));
+        
+        JTextField collegeNameField = new JTextField(20);
+        JTextField collegeCodeField = new JTextField(20);
+    
+        dialog.add(new JLabel("College Name:"));
+        dialog.add(collegeNameField);
+        dialog.add(new JLabel("College Code:"));
+        dialog.add(collegeCodeField);
+    
+        JButton saveButton = new JButton("Save");
+        JButton cancelButton = new JButton("Cancel");
+    
+        saveButton.addActionListener(e -> {
+            String newCollegeName = collegeNameField.getText().trim();
+            String newCollegeCode = collegeCodeField.getText().trim();
+            
+            // Validate inputs
+            if (newCollegeName.isEmpty() || newCollegeCode.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, 
+                    "College name and code cannot be empty", 
+                    "Validation Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Check for existing college code
+            if (CollegeDataManager.collegeCodeExists(newCollegeCode)) {
+                JOptionPane.showMessageDialog(dialog, 
+                    "A college with this code already exists", 
+                    "Duplicate College Code", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Check for existing college name
+            if (CollegeDataManager.collegeNameExists(newCollegeName)) {
+                JOptionPane.showMessageDialog(dialog, 
+                    "A college with this name already exists", 
+                    "Duplicate College Name", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Set the college details
+            CollegeDataManager.setCollegeName(newCollegeName);
+            CollegeDataManager.setCollegeCode(newCollegeCode);
+            
+            // Attempt to save the college
+            if (CollegeDataManager.saveCollege()) {
+                // Refresh the table to show the new data
+                collegeTable.refreshTable();
+                dialog.dispose();
+            } else {
+                JOptionPane.showMessageDialog(dialog, 
+                    "Failed to add college due to a database error", 
+                    "Database Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        
+        cancelButton.addActionListener(e -> dialog.dispose());
+    
+        dialog.add(saveButton);
+        dialog.add(cancelButton);
+        
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
     public static void editCollegeDialog(String collegeCode, CCollegeTable collegeTable) {
         JDialog dialog = new JDialog();
         dialog.setTitle("Edit College");

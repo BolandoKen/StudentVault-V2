@@ -63,6 +63,10 @@ public final class PCollegeTablePanel extends JPanel {
         addCollegeButton.setFocusPainted(false);
         addCollegeButton.setContentAreaFilled(false);
         addCollegeButton.setBackground(new Color(0xE7E7E7));
+
+        addCollegeButton.addActionListener(e -> {
+            Dialogs.addCollegeDialog(collegeTable);
+        });
  
         deleteButton = new JButton(new ImageIcon("Assets/DeleteIcon.png"));
         deleteButton.setBorderPainted(false);
