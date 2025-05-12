@@ -13,8 +13,8 @@ public class CProgramTable extends JPanel {
     public CProgramTable() {
         setLayout(new BorderLayout());
         
-        // Define column headers
-        String[] columns = {"Program ID", "Program Name", "Program Code", "College ID"};
+        // Define column headers - removed Program ID, changed College ID to College Code
+        String[] columns = {"Program Name", "Program Code", "College Code"};
         
         // Create a table model that doesn't allow cell editing
         tableModel = new DefaultTableModel(columns, 0) {
@@ -47,18 +47,18 @@ public class CProgramTable extends JPanel {
         tableModel.setRowCount(0);
         
         try (Connection conn = ProgramDataManager.getConnection()) {
-            String sql = "SELECT program_id, program_name, program_code, college_id FROM programs ORDER BY program_id";
+            // Updated SQL query to get college_code instead of college_id and removed program_id
+            String sql = "SELECT program_name, program_code, college_code FROM programs ORDER BY program_code";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                int programId = rs.getInt("program_id");
                 String programName = rs.getString("program_name");
                 String programCode = rs.getString("program_code");
-                int collegeId = rs.getInt("college_id");
+                String collegeCode = rs.getString("college_code");
                 
-                // Add row to table
-                Object[] rowData = {programId, programName, programCode, collegeId};
+                // Add row to table - removed programId, changed collegeId to collegeCode
+                Object[] rowData = {programName, programCode, collegeCode};
                 tableModel.addRow(rowData);
             }
         } catch (SQLException | ClassNotFoundException e) {
@@ -82,100 +82,38 @@ public class CProgramTable extends JPanel {
     }
     
     /**
-     * Deletes a program record
-     * @param row The row index to delete
-     * @return true if deletion was successful
+     * Gets the program code from the selected row
+     * @param row The selected row index
+     * @return The program code or null if invalid row
      */
-    public boolean deleteProgram(int row) {
-        if (row < 0 || row >= tableModel.getRowCount()) {
-            return false;
+    public String getSelectedProgramCode(int row) {
+        if (row >= 0 && row < tableModel.getRowCount()) {
+            return (String) tableModel.getValueAt(row, 1);
         }
-        
-        int programId = (int) tableModel.getValueAt(row, 0);
-        
-        try (Connection conn = ProgramDataManager.getConnection()) {
-            String sql = "DELETE FROM programs WHERE program_id = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, programId);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            if (rowsAffected > 0) {
-                // Remove from table model
-                tableModel.removeRow(row);
-                return true;
-            }
-            return false;
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("Error deleting program: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
+        return null;
     }
     
     /**
-     * Adds a new program record
-     * @param programName The name of the program
-     * @param programCode The code of the program
-     * @param collegeId The ID of the college
-     * @return true if addition was successful
+     * Gets the college code from the selected row
+     * @param row The selected row index
+     * @return The college code or null if invalid row
      */
-    public boolean addProgram(String programName, String programCode, int collegeId) {
-        try (Connection conn = ProgramDataManager.getConnection()) {
-            String sql = "INSERT INTO programs (program_name, program_code, college_id) VALUES (?, ?, ?)";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, programName);
-            pstmt.setString(2, programCode);
-            pstmt.setInt(3, collegeId);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            if (rowsAffected > 0) {
-                refreshData();
-                return true;
-            }
-            return false;
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("Error adding program: " + e.getMessage());
-            e.printStackTrace();
-            return false;
+    public String getSelectedCollegeCode(int row) {
+        if (row >= 0 && row < tableModel.getRowCount()) {
+            return (String) tableModel.getValueAt(row, 2);
         }
+        return null;
     }
     
     /**
-     * Updates an existing program record
-     * @param row The row index to update
-     * @param programName The new name of the program
-     * @param programCode The new code of the program
-     * @param collegeId The new college ID
-     * @return true if update was successful
+     * Gets the program name from the selected row
+     * @param row The selected row index
+     * @return The program name or null if invalid row
      */
-    public boolean updateProgram(int row, String programName, String programCode, int collegeId) {
-        if (row < 0 || row >= tableModel.getRowCount()) {
-            return false;
+    public String getSelectedProgramName(int row) {
+        if (row >= 0 && row < tableModel.getRowCount()) {
+            return (String) tableModel.getValueAt(row, 0);
         }
-        
-        int programId = (int) tableModel.getValueAt(row, 0);
-        
-        try (Connection conn = ProgramDataManager.getConnection()) {
-            String sql = "UPDATE programs SET program_name = ?, program_code = ?, college_id = ? WHERE program_id = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, programName);
-            pstmt.setString(2, programCode);
-            pstmt.setInt(3, collegeId);
-            pstmt.setInt(4, programId);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            if (rowsAffected > 0) {
-                refreshData();
-                return true;
-            }
-            return false;
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("Error updating program: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
+        return null;
     }
 }

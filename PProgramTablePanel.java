@@ -21,14 +21,6 @@ public final class PProgramTablePanel extends JPanel {
         gbc.gridy = 0;
         gbc.weighty = 0.02;
 
-        /* 
-        searchPanel.setCollegeTablePanel(this);
-        searchPanel.setFilterButtonAction(e -> {
-            JOptionPane.showMessageDialog(this, "No available filters", "Filter Info", JOptionPane.INFORMATION_MESSAGE);
-        });
-        */
-
-        //searchPanelContainer.add(searchPanel, BorderLayout.CENTER);
         this.add(searchPanelContainer, gbc);
 
         JPanel topRow = new JPanel(new GridBagLayout());
@@ -83,7 +75,21 @@ public final class PProgramTablePanel extends JPanel {
         editButton.setBorderPainted(false);
         editButton.setFocusPainted(false);
         editButton.setContentAreaFilled(false);
-        //editButton.addActionListener(e -> );
+       editButton.addActionListener(e -> {
+            JTable table = programTable.getTable();
+            int selectedRow = table.getSelectedRow();
+        
+            if (selectedRow != -1) {
+                Object idValue = table.getValueAt(selectedRow, 1);
+                if (idValue != null) {
+                    String programCode = idValue.toString();
+                    Dialogs.editProgramDialog(programCode, programTable); 
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Please select a college to edit.", "No Selection", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
         buttonsPanel.add(addCollegeButton);
         buttonsPanel.add(deleteButton);
         buttonsPanel.add(editButton);

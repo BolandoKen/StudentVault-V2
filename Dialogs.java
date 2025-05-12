@@ -2,9 +2,6 @@ import java.awt.FlowLayout;
 import javax.swing.*;
 
 public class Dialogs {
-    // Remove the private constructor as it's not needed
-    // private Dialogs() { ... }
-
     public static void editCollegeDialog(String collegeCode, CCollegeTable collegeTable) {
         JDialog dialog = new JDialog();
         dialog.setTitle("Edit College");
@@ -44,13 +41,52 @@ public class Dialogs {
         dialog.add(saveButton);
         dialog.add(cancelButton);
         
-        // Pack the dialog to size it properly
         dialog.pack();
-        
-        // Center the dialog
         dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
+
+    public static void editProgramDialog(String programCode, CProgramTable programTable) {
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Edit Program");
+        dialog.setLayout(new FlowLayout());
         
-        // Make it visible
+        JTextField programNameField = new JTextField(20);
+        programNameField.setText(ProgramDataManager.getProgramName(programCode));
+    
+        JTextField programCodeField = new JTextField(20);
+        programCodeField.setText(programCode);
+    
+        dialog.add(new JLabel("Program Name:"));
+        dialog.add(programNameField);
+        dialog.add(new JLabel("Program Code:"));
+        dialog.add(programCodeField);
+    
+        JButton saveButton = new JButton("Save");
+        JButton cancelButton = new JButton("Cancel");
+    
+        saveButton.addActionListener(e -> {
+            String newProgramName = programNameField.getText();
+            String newProgramCode = programCodeField.getText();
+            
+            if (!ProgramDataManager.updateProgram(programCode, newProgramName, newProgramCode)) {
+                JOptionPane.showMessageDialog(dialog, 
+                    "Failed to update program", 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            } else {
+                programTable.refreshData();
+                dialog.dispose();
+            }
+        });
+        
+        cancelButton.addActionListener(e -> dialog.dispose());
+    
+        dialog.add(saveButton);
+        dialog.add(cancelButton);
+        
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 }

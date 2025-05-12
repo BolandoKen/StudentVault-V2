@@ -18,8 +18,7 @@ public class ProgramDataManager {
     // Program form data
     private static String programName;
     private static String programCode;
-    private static Integer programId;
-    private static Integer collegeId;
+    private static String collegeCode;
     
     // Getters and setters
     public static void setProgramName(String value) { programName = value; }
@@ -28,11 +27,8 @@ public class ProgramDataManager {
     public static void setProgramCode(String value) { programCode = value; }
     public static String getProgramCode() { return programCode; }
     
-    public static void setProgramId(Integer value) { programId = value; }
-    public static Integer getProgramId() { return programId; }
-    
-    public static void setCollegeId(Integer value) { collegeId = value; }
-    public static Integer getCollegeId() { return collegeId; }
+    public static void setCollegeCode(String value) { collegeCode = value; }
+    public static String getCollegeCode() { return collegeCode; }
     
     /**
      * Create a database connection
@@ -51,12 +47,12 @@ public class ProgramDataManager {
      */
     public static boolean saveProgram() {
         try (Connection conn = getConnection()) {
-            String sql = "INSERT INTO programs (program_name, program_code, college_id) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO programs (program_name, program_code, college_code) VALUES (?, ?, ?)";
             
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, programName);
             pstmt.setString(2, programCode);
-            pstmt.setInt(3, collegeId);
+            pstmt.setString(3, collegeCode);
             
             int rowsAffected = pstmt.executeUpdate();
             
@@ -68,25 +64,24 @@ public class ProgramDataManager {
     }
     
     /**
-     * Retrieves program information from the database based on program ID
-     * @param id The ID of the program to retrieve
+     * Retrieves program information from the database based on program code
+     * @param code The code of the program to retrieve
      * @return true if program found and data loaded, false otherwise
      */
-    public static boolean getProgramById(int id) {
+    public static boolean getProgramByCode(String code) {
         try (Connection conn = getConnection()) {
-            String sql = "SELECT program_id, program_name, program_code, college_id FROM programs WHERE program_id = ?";
+            String sql = "SELECT program_name, program_code, college_code FROM programs WHERE program_code = ?";
             
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, id);
+            pstmt.setString(1, code);
             
             ResultSet resultSet = pstmt.executeQuery();
             
             if (resultSet.next()) {
                 // Load the retrieved data into the static fields
-                programId = resultSet.getInt("program_id");
                 programName = resultSet.getString("program_name");
                 programCode = resultSet.getString("program_code");
-                collegeId = resultSet.getInt("college_id");
+                collegeCode = resultSet.getString("college_code");
                 
                 return true; // Program found and data loaded
             } else {
@@ -97,30 +92,51 @@ public class ProgramDataManager {
             return false;
         }
     }
-    
     /**
-     * Updates existing program information in the database
-     * @param id The ID of the program to update
-     * @return true if update successful, false otherwise
+     * Retrieves the name of a program based on its code
+     * @param programCode The code of the program
+     * @return The name of the program, or null if not found
      */
-    public static boolean updateProgram(int id) {
+    public static String getProgramName(String programCode) {
         try (Connection conn = getConnection()) {
-            String sql = "UPDATE programs SET program_name = ?, program_code = ?, college_id = ? WHERE program_id = ?";
-            
+            String sql = "SELECT program_name FROM programs WHERE program_code = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, programName);
-            pstmt.setString(2, programCode);
-            pstmt.setInt(3, collegeId);
-            pstmt.setInt(4, id);
+            pstmt.setString(1, programCode);
             
-            int rowsAffected = pstmt.executeUpdate();
-            
-            return rowsAffected > 0;
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("program_name");
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
+        return null;
     }
+    
+    /**
+ * Updates existing program information in the database
+ * @param oldProgramCode The current code of the program to update
+ * @param newProgramName The new name for the program
+ * @param newProgramCode The new code for the program
+ * @return true if update successful, false otherwise
+ */
+    public static boolean updateProgram(String oldProgramCode, String newProgramName, String newProgramCode) {
+        try (Connection conn = getConnection()) {
+        String sql = "UPDATE programs SET program_name = ?, program_code = ? WHERE program_code = ?";
+        
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, newProgramName);
+        pstmt.setString(2, newProgramCode);
+        pstmt.setString(3, oldProgramCode);
+        
+        int rowsAffected = pstmt.executeUpdate();
+        
+        return rowsAffected > 0;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
     
     /**
      * Check if all required fields are filled
@@ -129,20 +145,20 @@ public class ProgramDataManager {
     public static boolean validateFields() {
         return programName != null && !programName.isEmpty() &&
                programCode != null && !programCode.isEmpty() &&
-               collegeId != null;
+               collegeCode != null && !collegeCode.isEmpty();
     }
     
     /**
-     * Deletes a program from the database based on program ID
-     * @param id The ID of the program to delete
+     * Deletes a program from the database based on program code
+     * @param code The code of the program to delete
      * @return true if deletion successful, false otherwise
      */
-    public static boolean deleteProgram(int id) {
+    public static boolean deleteProgram(String code) {
         try (Connection conn = getConnection()) {
-            String sql = "DELETE FROM programs WHERE program_id = ?";
+            String sql = "DELETE FROM programs WHERE program_code = ?";
             
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, id);
+            pstmt.setString(1, code);
             
             int rowsAffected = pstmt.executeUpdate();
             
@@ -159,26 +175,25 @@ public class ProgramDataManager {
     public static void clearFormData() {
         programName = null;
         programCode = null;
-        programId = null;
-        collegeId = null;
+        collegeCode = null;
     }
     
     /**
-     * Loads all programs into a map (id -> name)
-     * @return Map of program IDs to names
+     * Loads all programs into a map (code -> name)
+     * @return Map of program codes to names
      */
-    public static Map<Integer, String> loadProgramMap() {
-        Map<Integer, String> programMap = new HashMap<>();
+    public static Map<String, String> loadProgramMap() {
+        Map<String, String> programMap = new HashMap<>();
         
         try (Connection conn = getConnection()) {
-            String sql = "SELECT program_id, program_name FROM programs";
+            String sql = "SELECT program_code, program_name FROM programs";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                int id = rs.getInt("program_id");
+                String code = rs.getString("program_code");
                 String name = rs.getString("program_name");
-                programMap.put(id, name);
+                programMap.put(code, name);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -226,23 +241,23 @@ public class ProgramDataManager {
     }
     
     /**
-     * Loads programs by college ID
-     * @param collegeId The college ID to filter by
-     * @return Map of program IDs to names
+     * Loads programs by college code
+     * @param collegeCode The college code to filter by
+     * @return Map of program codes to names
      */
-    public static Map<Integer, String> loadProgramsByCollege(int collegeId) {
-        Map<Integer, String> programMap = new HashMap<>();
+    public static Map<String, String> loadProgramsByCollege(String collegeCode) {
+        Map<String, String> programMap = new HashMap<>();
         
         try (Connection conn = getConnection()) {
-            String sql = "SELECT program_id, program_name FROM programs WHERE college_id = ?";
+            String sql = "SELECT program_code, program_name FROM programs WHERE college_code = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, collegeId);
+            pstmt.setString(1, collegeCode);
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                int id = rs.getInt("program_id");
+                String code = rs.getString("program_code");
                 String name = rs.getString("program_name");
-                programMap.put(id, name);
+                programMap.put(code, name);
             }
         } catch (Exception e) {
             e.printStackTrace();
