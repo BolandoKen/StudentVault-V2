@@ -72,6 +72,21 @@ public final class PCollegeTablePanel extends JPanel {
         deleteButton.setBorderPainted(false);
         deleteButton.setFocusPainted(false);
         deleteButton.setContentAreaFilled(false);
+
+        deleteButton.addActionListener(e -> {
+            JTable table = collegeTable.getTable();
+            int selectedRow = table.getSelectedRow();
+        
+            if (selectedRow != -1) {
+                Object idValue = table.getValueAt(selectedRow, 0);
+                if (idValue != null) {
+                    String collegeCode = idValue.toString();
+                    Dialogs.deleteCollegeDialog(collegeCode, collegeTable); 
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Please select a college to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
+            }
+        });
     
         editButton = new JButton(new ImageIcon("Assets/EditIcon.png"));
         editButton.setBorderPainted(false);

@@ -1,5 +1,6 @@
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.util.Map;
 import javax.swing.*;
 
 public class Dialogs {
@@ -145,8 +146,135 @@ public class Dialogs {
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
+    public static void deleteCollegeDialog(String collegeCode, CCollegeTable collegeTable) {
 
-   public static void editProgramDialog(String programCode, CProgramTable programTable) {
+        int confirm = JOptionPane.showConfirmDialog(
+            null, 
+            "Are you sure you want to delete this college? This action cannot be undone.", 
+            "Confirm Delete", 
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (CollegeDataManager.deleteCollege(collegeCode)) {
+                // Refresh the table to reflect the deletion
+                collegeTable.refreshTable();
+                JOptionPane.showMessageDialog(
+                    null, 
+                    "College deleted successfully.", 
+                    "Success", 
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(
+                    null, 
+                    "Failed to delete college. Please try again.", 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    }
+
+    public static void addProgramDialog(CProgramTable programTable) {
+    JDialog dialog = new JDialog();
+    dialog.setTitle("Add New Program");
+    dialog.setLayout(new GridLayout(4, 2));
+    
+    JTextField programNameField = new JTextField(20);
+    JTextField programCodeField = new JTextField(20);
+    
+    // Create a college dropdown
+    JComboBox<String> collegeDropdown = new JComboBox<>();
+    Map<String, String> collegeMap = CollegeDataManager.loadCollegeMap();
+    // Add a prompt as first item
+    collegeDropdown.addItem("-- Select College --");
+    // Add all colleges to dropdown
+    for (Map.Entry<String, String> entry : collegeMap.entrySet()) {
+        collegeDropdown.addItem(entry.getValue() + " (" + entry.getKey() + ")");
+    }
+    
+    dialog.add(new JLabel("Program Name:"));
+    dialog.add(programNameField);
+    dialog.add(new JLabel("Program Code:"));
+    dialog.add(programCodeField);
+    dialog.add(new JLabel("College:"));
+    dialog.add(collegeDropdown);
+    
+    JButton saveButton = new JButton("Save");
+    JButton cancelButton = new JButton("Cancel");
+    
+    saveButton.addActionListener(e -> {
+        String newProgramName = programNameField.getText().trim();
+        String newProgramCode = programCodeField.getText().trim();
+        
+        // Get selected college
+        int selectedIndex = collegeDropdown.getSelectedIndex();
+        
+        // Validate inputs
+        if (newProgramName.isEmpty() || newProgramCode.isEmpty()) {
+            JOptionPane.showMessageDialog(dialog, 
+                "Program name and code cannot be empty", 
+                "Validation Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Validate college selection
+        if (selectedIndex <= 0) {
+            JOptionPane.showMessageDialog(dialog, 
+                "Please select a college for this program", 
+                "Validation Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Check for existing program code
+        if (ProgramDataManager.programCodeExists(newProgramCode)) {
+            JOptionPane.showMessageDialog(dialog, 
+                "A program with this code already exists", 
+                "Duplicate Program Code", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Check for existing program name
+        if (ProgramDataManager.programNameExists(newProgramName)) {
+            JOptionPane.showMessageDialog(dialog, 
+                "A program with this name already exists", 
+                "Duplicate Program Name", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Extract college code from selected item
+        String selectedCollege = (String) collegeDropdown.getSelectedItem();
+        String collegeCode = selectedCollege.substring(selectedCollege.lastIndexOf("(") + 1, selectedCollege.lastIndexOf(")"));
+        
+        // Attempt to add the program directly
+        if (ProgramDataManager.addProgram(newProgramName, newProgramCode, collegeCode)) {
+            // Refresh the table to show the new data
+            programTable.refreshData();
+            dialog.dispose();
+        } else {
+            JOptionPane.showMessageDialog(dialog, 
+                "Failed to add program due to a database error", 
+                "Database Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    });
+    
+    cancelButton.addActionListener(e -> dialog.dispose());
+    
+    dialog.add(saveButton);
+    dialog.add(cancelButton);
+    
+    dialog.pack();
+    dialog.setLocationRelativeTo(null);
+    dialog.setVisible(true);
+}
+    public static void editProgramDialog(String programCode, CProgramTable programTable) {
+
     JDialog dialog = new JDialog();
     dialog.setTitle("Edit Program");
     dialog.setLayout(new FlowLayout());
@@ -188,5 +316,33 @@ public class Dialogs {
     dialog.pack();
     dialog.setLocationRelativeTo(null);
     dialog.setVisible(true);
+}
+    public static void deleteProgramDialog(String programCode, CProgramTable programTable) {
+    int confirm = JOptionPane.showConfirmDialog(
+        null, 
+        "Are you sure you want to delete this program? This action cannot be undone.", 
+        "Confirm Delete", 
+        JOptionPane.YES_NO_OPTION
+    );
+
+    if (confirm == JOptionPane.YES_OPTION) {
+        if (ProgramDataManager.deleteProgram(programCode)) {
+            // Refresh the table to reflect the deletion
+            programTable.refreshData();
+            JOptionPane.showMessageDialog(
+                null, 
+                "Program deleted successfully.", 
+                "Success", 
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        } else {
+            JOptionPane.showMessageDialog(
+                null, 
+                "Failed to delete program. Please try again.", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
 }
 }

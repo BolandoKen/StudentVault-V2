@@ -138,6 +138,47 @@ public class ProgramDataManager {
     }
 }
     
+/**
+ * Adds a new program to the database with the specified details
+ * @param programName The name of the program to add
+ * @param programCode The code for the program to add
+ * @param collegeCode The code of the college to which this program belongs
+ * @return true if program was added successfully, false otherwise
+ */
+public static boolean addProgram(String programName, String programCode, String collegeCode) {
+    // Validate inputs
+    if (programName == null || programName.trim().isEmpty() ||
+        programCode == null || programCode.trim().isEmpty() ||
+        collegeCode == null || collegeCode.trim().isEmpty()) {
+        return false;
+    }
+    
+    // Check for duplicate program code
+    if (programCodeExists(programCode)) {
+        return false;
+    }
+    
+    // Check for duplicate program name
+    if (programNameExists(programName)) {
+        return false;
+    }
+    
+    try (Connection conn = getConnection()) {
+        String sql = "INSERT INTO programs (program_name, program_code, college_code) VALUES (?, ?, ?)";
+        
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, programName);
+        pstmt.setString(2, programCode);
+        pstmt.setString(3, collegeCode);
+        
+        int rowsAffected = pstmt.executeUpdate();
+        
+        return rowsAffected > 0;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
     /**
      * Check if all required fields are filled
      * @return true if all fields have values, false otherwise

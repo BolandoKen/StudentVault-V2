@@ -59,18 +59,36 @@ public final class PProgramTablePanel extends JPanel {
         buttonsPanel.setOpaque(false);
         rightPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
-        JButton addCollegeButton = new JButton(new ImageIcon("Assets/PlusIcon.png"));
-        addCollegeButton.setBorderPainted(false);
-        addCollegeButton.setFocusPainted(false);
-        addCollegeButton.setContentAreaFilled(false);
-        addCollegeButton.setBackground(new Color(0xE7E7E7));
+        JButton addProgramButton = new JButton(new ImageIcon("Assets/PlusIcon.png"));
+        addProgramButton.setBorderPainted(false);
+        addProgramButton.setFocusPainted(false);
+        addProgramButton.setContentAreaFilled(false);
+        addProgramButton.setBackground(new Color(0xE7E7E7));
+
+        addProgramButton.addActionListener(e -> {
+            Dialogs.addProgramDialog(programTable);
+        });
  
         deleteButton = new JButton(new ImageIcon("Assets/DeleteIcon.png"));
         deleteButton.setBorderPainted(false);
         deleteButton.setFocusPainted(false);
         deleteButton.setContentAreaFilled(false);
-       //deleteButton.addActionListener(e -> removeCollege());
 
+        deleteButton.addActionListener(e -> {
+            JTable table = programTable.getTable();
+            int selectedRow = table.getSelectedRow();
+        
+            if (selectedRow != -1) {
+                Object idValue = table.getValueAt(selectedRow, 1);
+                if (idValue != null) {
+                    String programCode = idValue.toString();
+                    Dialogs.deleteProgramDialog(programCode, programTable); 
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Please select a college to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+        
         editButton = new JButton(new ImageIcon("Assets/EditIcon.png"));
         editButton.setBorderPainted(false);
         editButton.setFocusPainted(false);
@@ -90,7 +108,7 @@ public final class PProgramTablePanel extends JPanel {
             }
         });
 
-        buttonsPanel.add(addCollegeButton);
+        buttonsPanel.add(addProgramButton);
         buttonsPanel.add(deleteButton);
         buttonsPanel.add(editButton);
 
