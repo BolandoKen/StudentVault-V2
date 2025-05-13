@@ -5,10 +5,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import javax.swing.RowFilter;
 
 public class CCollegeTable extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> sorter;
+    private JTextField searchField;
+    private JComboBox<String> searchColumnComboBox;
 
     public CCollegeTable() {
         setLayout(new BorderLayout());
@@ -27,6 +32,10 @@ public class CCollegeTable extends JPanel {
         // Create table with the model
         table = new JTable(tableModel);
         
+        // Create and add the sorter for search filtering
+        sorter = new TableRowSorter<>(tableModel);
+        table.setRowSorter(sorter);
+        
         table.setRowHeight(25);
         table.setFont(new Font("Helvetica", Font.PLAIN, 14));
         table.getTableHeader().setFont(new Font("Helvetica", Font.BOLD, 14));
@@ -35,8 +44,121 @@ public class CCollegeTable extends JPanel {
         JScrollPane scrollPane = new JScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
         
+        // Create search panel
+        JPanel searchPanel = createSearchPanel();
+        add(searchPanel, BorderLayout.NORTH);
+        
         // Load college data
         loadCollegeData();
+    }
+    
+    /**
+     * Creates a panel with search components
+     */
+    private JPanel createSearchPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+        // Create search field
+        searchField = new JTextField(20);
+        searchField.addActionListener(e -> performSearch());
+        
+        // Create column selector for search
+        searchColumnComboBox = new JComboBox<>(new String[]{"All Columns", "College Code", "College Name"});
+        
+        // Create search button
+        JButton searchButton = new JButton("Search");
+        searchButton.addActionListener(e -> performSearch());
+        
+        // Create clear button
+        JButton clearButton = new JButton("Clear");
+        clearButton.addActionListener(e -> {
+            searchField.setText("");
+            performSearch();
+        });
+        
+        // Add components to panel
+        panel.add(new JLabel("Search:"));
+        panel.add(searchField);
+        panel.add(searchColumnComboBox);
+        panel.add(searchButton);
+        panel.add(clearButton);
+        
+        return panel;
+    }
+    
+    /**
+     * Performs the search based on the search field and column selection
+     */
+    private void performSearch() {
+        String searchText = searchField.getText().toLowerCase().trim();
+        if (searchText.isEmpty()) {
+            sorter.setRowFilter(null); // Show all rows if search is empty
+            return;
+        }
+        
+        int selectedIndex = searchColumnComboBox.getSelectedIndex();
+        
+        if (selectedIndex == 0) { // All Columns
+            // Create a composite row filter that checks all columns
+            RowFilter<DefaultTableModel, Integer> filter = new RowFilter<DefaultTableModel, Integer>() {
+                @Override
+                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                    for (int i = 0; i < entry.getValueCount(); i++) {
+                        if (entry.getStringValue(i).toLowerCase().contains(searchText)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            };
+            sorter.setRowFilter(filter);
+        } else {
+            // Search in specific column (subtract 1 because "All Columns" is at index 0)
+            int columnToSearch = selectedIndex - 1;
+            RowFilter<DefaultTableModel, Integer> filter = 
+                RowFilter.regexFilter("(?i)" + searchText, columnToSearch);
+            sorter.setRowFilter(filter);
+        }
+    }
+    
+    /**
+     * Search by a specific term in all columns
+     * 
+     * @param searchTerm The term to search for
+     */
+    public void searchAllColumns(String searchTerm) {
+        searchField.setText(searchTerm);
+        searchColumnComboBox.setSelectedIndex(0); // All columns
+        performSearch();
+    }
+    
+    /**
+     * Search in a specific column
+     * 
+     * @param searchTerm The term to search for
+     * @param columnName The name of the column to search in ("College Code" or "College Name")
+     */
+    public void searchByColumn(String searchTerm, String columnName) {
+        searchField.setText(searchTerm);
+        
+        // Set the appropriate column in combo box
+        if (columnName.equals("College Code")) {
+            searchColumnComboBox.setSelectedIndex(1);
+        } else if (columnName.equals("College Name")) {
+            searchColumnComboBox.setSelectedIndex(2);
+        } else {
+            searchColumnComboBox.setSelectedIndex(0); // Default to All Columns
+        }
+        
+        performSearch();
+    }
+    
+    /**
+     * Clear the current search and show all rows
+     */
+    public void clearSearch() {
+        searchField.setText("");
+        performSearch();
     }
     
     /**
@@ -73,12 +195,20 @@ public class CCollegeTable extends JPanel {
         // Save current selection if any (now using college code as identifier)
         int selectedRow = table.getSelectedRow();
         String selectedCode = selectedRow >= 0 ? (String) tableModel.getValueAt(selectedRow, 0) : null;
+        
+        // Save current search
+        String currentSearch = searchField.getText();
+        int currentSearchColumn = searchColumnComboBox.getSelectedIndex();
 
         // Show loading feedback
         Cursor oldCursor = getCursor();
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         
         try {
+            // Clear search filter temporarily
+            sorter.setRowFilter(null);
+            
+            // Reload data
             loadCollegeData();
             
             // Restore selection if possible
@@ -89,6 +219,11 @@ public class CCollegeTable extends JPanel {
                         break;
                     }
                 }
+            }
+            
+            // Reapply search if there was one
+            if (!currentSearch.isEmpty()) {
+                performSearch();
             }
         } finally {
             // Restore cursor
@@ -101,5 +236,30 @@ public class CCollegeTable extends JPanel {
      */
     public JTable getTable() {
         return table;
+    }
+    
+    /**
+     * Returns the currently selected college code or null if none selected
+     */
+    public String getSelectedCollegeCode() {
+        int viewRow = table.getSelectedRow();
+        if (viewRow < 0) {
+            return null;
+        }
+        
+        // Convert view row index to model row index
+        int modelRow = table.convertRowIndexToModel(viewRow);
+        return (String) tableModel.getValueAt(modelRow, 0);
+    }
+    
+    /**
+     * Returns the search panel components to allow external access
+     */
+    public JTextField getSearchField() {
+        return searchField;
+    }
+    
+    public JComboBox<String> getSearchColumnComboBox() {
+        return searchColumnComboBox;
     }
 }

@@ -9,8 +9,11 @@ public final class PCollegeTablePanel extends JPanel {
     private JButton confirmDeleteButton;
     private JPanel buttonsPanel;
     private JButton editButton;
+    private CSearchPanels.CollegeSearchPanel searchPanel;
 
     public PCollegeTablePanel() {
+        collegeTable = new CCollegeTable();
+
         this.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -21,6 +24,24 @@ public final class PCollegeTablePanel extends JPanel {
         gbc.gridy = 0;
         gbc.weighty = 0.02;
 
+        searchPanel = new CSearchPanels.CollegeSearchPanel(params -> {
+            String searchText = params[0];
+            String columnName = params[1];
+            
+            if (searchText.isEmpty()) {
+                collegeTable.clearSearch();
+                return;
+            }
+            
+            if (columnName.equals("All")) {
+                collegeTable.searchAllColumns(searchText);
+            } else {
+                collegeTable.searchByColumn(searchText, columnName);
+            }
+        });
+
+        searchPanelContainer.add(searchPanel, BorderLayout.NORTH);
+        this.add(searchPanelContainer, gbc);
 
         JPanel topRow = new JPanel(new GridBagLayout());
         topRow.setOpaque(false);
@@ -128,7 +149,7 @@ public final class PCollegeTablePanel extends JPanel {
         gbc.weighty = 0.9;
         this.add(bottomRow, gbc);
 
-        collegeTable = new CCollegeTable();
+       
     
         JScrollPane scrollPane = new JScrollPane(collegeTable);
         bottomRow.add(scrollPane, BorderLayout.CENTER);
