@@ -188,30 +188,26 @@ public class CCollegeTable extends JPanel {
         }
     }
     
-    /**
-     * Refreshes table data from the database
-     */
+   
     public void refreshTable() {
-        // Save current selection if any (now using college code as identifier)
+     
         int selectedRow = table.getSelectedRow();
         String selectedCode = selectedRow >= 0 ? (String) tableModel.getValueAt(selectedRow, 0) : null;
         
-        // Save current search
+       
         String currentSearch = searchField.getText();
         int currentSearchColumn = searchColumnComboBox.getSelectedIndex();
 
-        // Show loading feedback
         Cursor oldCursor = getCursor();
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         
         try {
-            // Clear search filter temporarily
+           
             sorter.setRowFilter(null);
             
-            // Reload data
+      
             loadCollegeData();
-            
-            // Restore selection if possible
+         
             if (selectedCode != null) {
                 for (int i = 0; i < tableModel.getRowCount(); i++) {
                     if (selectedCode.equals(tableModel.getValueAt(i, 0))) {
@@ -221,40 +217,34 @@ public class CCollegeTable extends JPanel {
                 }
             }
             
-            // Reapply search if there was one
+  
             if (!currentSearch.isEmpty()) {
                 performSearch();
             }
         } finally {
-            // Restore cursor
+        
             setCursor(oldCursor);
         }
     }
     
-    /**
-     * Returns the JTable component
-     */
+
     public JTable getTable() {
         return table;
     }
     
-    /**
-     * Returns the currently selected college code or null if none selected
-     */
+  
     public String getSelectedCollegeCode() {
         int viewRow = table.getSelectedRow();
         if (viewRow < 0) {
             return null;
         }
         
-        // Convert view row index to model row index
+       
         int modelRow = table.convertRowIndexToModel(viewRow);
         return (String) tableModel.getValueAt(modelRow, 0);
     }
     
-    /**
-     * Returns the search panel components to allow external access
-     */
+
     public JTextField getSearchField() {
         return searchField;
     }
