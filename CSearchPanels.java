@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.util.function.Consumer;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  * This class contains various search panel implementations
@@ -17,6 +19,7 @@ public class CSearchPanels {
         private JButton searchButton;
         private JButton clearButton;
         private Consumer<String[]> searchCallback;
+        private Timer searchTimer;
 
         /**
          * Constructs a college search panel
@@ -45,12 +48,30 @@ public class CSearchPanels {
 
             // Create search field
             searchField = new JTextField(20);
-            searchField.addActionListener(e -> performSearch());
+            
+            // Add document listener for live search
+            searchField.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    triggerDelayedSearch();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    triggerDelayedSearch();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    triggerDelayedSearch();
+                }
+            });
 
             // Create column selector for search
             searchColumnComboBox = new JComboBox<>(new String[]{"All", "College Code", "College Name"});
+            searchColumnComboBox.addActionListener(e -> performSearch());
 
-            // Create search button
+            // Create search button (still available for explicit search if needed)
             searchButton = new JButton("Search");
             searchButton.addActionListener(e -> performSearch());
 
@@ -69,6 +90,20 @@ public class CSearchPanels {
             add(searchColumnComboBox);
             add(searchButton);
             add(clearButton);
+
+            // Initialize search timer for delayed search
+            searchTimer = new Timer(300, e -> performSearch());
+            searchTimer.setRepeats(false);
+        }
+
+        /**
+         * Triggers a delayed search after user stops typing
+         */
+        private void triggerDelayedSearch() {
+            if (searchTimer.isRunning()) {
+                searchTimer.stop();
+            }
+            searchTimer.start();
         }
 
         /**
@@ -151,5 +186,4 @@ public class CSearchPanels {
             return (String) searchColumnComboBox.getSelectedItem();
         }
     }
-
 }

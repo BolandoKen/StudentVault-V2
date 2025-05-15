@@ -46,7 +46,7 @@ public class CCollegeTable extends JPanel {
         
         // Create search panel
         JPanel searchPanel = createSearchPanel();
-        add(searchPanel, BorderLayout.NORTH);
+        //add(searchPanel, BorderLayout.NORTH);
         
         // Load college data
         loadCollegeData();
