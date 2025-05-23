@@ -187,8 +187,6 @@ public class CCollegeTable extends JPanel {
     }
 }
 
-    
-   
     public void refreshTable() {
      
         int selectedRow = table.getSelectedRow();
@@ -227,12 +225,10 @@ public class CCollegeTable extends JPanel {
         }
     }
     
-
     public JTable getTable() {
         return table;
     }
     
-  
     public String getSelectedCollegeCode() {
         int viewRow = table.getSelectedRow();
         if (viewRow < 0) {
@@ -244,7 +240,6 @@ public class CCollegeTable extends JPanel {
         return (String) tableModel.getValueAt(modelRow, 0);
     }
     
-
     public JTextField getSearchField() {
         return searchField;
     }

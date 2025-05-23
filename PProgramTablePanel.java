@@ -1,16 +1,18 @@
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 public final class PProgramTablePanel extends JPanel {
     private CProgramTable programTable;
-    private boolean selectionMode = false;
-    private JButton deleteButton;
-    private JButton cancelButton;
-    private JButton confirmDeleteButton;
-    private JPanel buttonsPanel;
-    private JButton editButton;
+    private final JButton deleteButton;
+    private final JPanel buttonsPanel;
+    private final JButton editButton;
+    private final CSearchPanels.ProgramSearchPanel programSearchPanel;
 
     public PProgramTablePanel() {
+        programTable = new CProgramTable();
+
         this.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -21,6 +23,38 @@ public final class PProgramTablePanel extends JPanel {
         gbc.gridy = 0;
         gbc.weighty = 0.02;
 
+        programSearchPanel = new CSearchPanels.ProgramSearchPanel(params -> {
+            String searchText = params[0];
+            String columnName = params[1];
+            
+            if (searchText.isEmpty()) {
+                programTable.refreshData(); // Clear search by refreshing original data
+                return;
+            }
+            
+            // Convert the column name to match database column names if needed
+            String dbColumnName = "";
+            switch (columnName) {
+                case "Program Code":
+                    dbColumnName = "program_code";
+                    break;
+                case "Program Name":
+                    dbColumnName = "program_name";
+                    break;
+                case "College Code":
+                    dbColumnName = "college_code";
+                    break;
+                case "All":
+                default:
+                    dbColumnName = "all";
+                    break;
+            }
+            
+            // Filter the table based on search criteria
+            filterProgramTable(searchText, dbColumnName);
+        });
+        
+        searchPanelContainer.add(programSearchPanel, BorderLayout.NORTH);
         this.add(searchPanelContainer, gbc);
 
         JPanel topRow = new JPanel(new GridBagLayout());
@@ -126,19 +160,46 @@ public final class PProgramTablePanel extends JPanel {
         gbc.weighty = 0.9;
         this.add(bottomRow, gbc);
 
-        programTable = new CProgramTable();
-        
-        // Initialize the table with data
-        //CollegeTableUtility.populateCollegeTable(collegeTable);
-
         JScrollPane scrollPane = new JScrollPane(programTable);
         bottomRow.add(scrollPane, BorderLayout.CENTER);
     }
-   /**
- * Returns the CProgramTable associated with this panel
- * @return The CProgramTable instance
- */
-public CProgramTable getProgramTable() {
+
+    public CProgramTable getProgramTable() {
     return programTable;
+    }
+
+    private void filterProgramTable(String searchText, String columnName) {
+    DefaultTableModel model = (DefaultTableModel) programTable.getTable().getModel();
+    TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+    programTable.getTable().setRowSorter(sorter);
+    
+    if (columnName.equals("all")) {
+        // Search all columns
+        RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText);
+        sorter.setRowFilter(filter);
+    } else {
+        // Search specific column
+        int columnIndex = -1;
+        switch (columnName) {
+            case "program_code":
+                columnIndex = 1; // Program Code is column 1 in CProgramTable
+                break;
+            case "program_name":
+                columnIndex = 0; // Program Name is column 0
+                break;
+            case "college_code":
+                columnIndex = 2; // College Code is column 2
+                break;
+        }
+        
+        if (columnIndex >= 0) {
+            RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText, columnIndex);
+            sorter.setRowFilter(filter);
+        }
+    }
+}
+
+    public JTable getTable() {
+    return programTable.getTable();
 }
 }

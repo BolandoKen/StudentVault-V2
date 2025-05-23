@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 public class CProgramTable extends JPanel {
     private JTable table;
@@ -116,5 +117,44 @@ public class CProgramTable extends JPanel {
         }
         return null;
     }
+    public void clearSearch() {
+    TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) getTable().getRowSorter();
+    if (sorter != null) {
+        sorter.setRowFilter(null);
+    }
+}
+
+    public void searchAllColumns(String searchText) {
+    DefaultTableModel model = (DefaultTableModel) getTable().getModel();
+    TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+    getTable().setRowSorter(sorter);
+    RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText);
+    sorter.setRowFilter(filter);
+}
+
+    public void searchByColumn(String searchText, String columnName) {
+    DefaultTableModel model = (DefaultTableModel) getTable().getModel();
+    TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+    getTable().setRowSorter(sorter);
+    
+    int columnIndex = -1;
+    switch (columnName) {
+        case "Program Code":
+            columnIndex = 1;
+            break;
+        case "Program Name":
+            columnIndex = 0;
+            break;
+        case "College Code":
+            columnIndex = 2;
+            break;
+    }
+    
+    if (columnIndex >= 0) {
+        RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText, columnIndex);
+        sorter.setRowFilter(filter);
+    }
+}
+
     
 }
