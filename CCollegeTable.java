@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
-import javax.swing.RowFilter;
 
 public class CCollegeTable extends JPanel {
     private JTable table;
@@ -165,28 +164,29 @@ public class CCollegeTable extends JPanel {
      * Loads college data from database (updated for new table structure)
      */
     private void loadCollegeData() {
-        // Clear existing data
-        tableModel.setRowCount(0);
-        
-        try (Connection conn = StudentDataManager.getConnection()) {
-            // Updated query for new table structure
-            String sql = "SELECT college_code, college_name FROM colleges ORDER BY college_code";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                String collegeCode = rs.getString("college_code");
-                String collegeName = rs.getString("college_name");
-                
-                // Add row to table (now only code and name)
-                Object[] rowData = {collegeCode, collegeName};
-                tableModel.addRow(rowData);
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("Error loading college data: " + e.getMessage());
-            e.printStackTrace();
+    // Clear existing data
+    tableModel.setRowCount(0);
+
+    try (Connection conn = StudentDataManager.getConnection()) {
+        // Skip 'N/A' college using WHERE clause
+        String sql = "SELECT college_code, college_name FROM colleges WHERE college_code <> 'N/A' ORDER BY college_code";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        ResultSet rs = pstmt.executeQuery();
+
+        while (rs.next()) {
+            String collegeCode = rs.getString("college_code");
+            String collegeName = rs.getString("college_name");
+
+            // Add row to table (now only code and name)
+            Object[] rowData = {collegeCode, collegeName};
+            tableModel.addRow(rowData);
         }
+    } catch (SQLException | ClassNotFoundException e) {
+        System.err.println("Error loading college data: " + e.getMessage());
+        e.printStackTrace();
     }
+}
+
     
    
     public void refreshTable() {

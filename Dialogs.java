@@ -1,4 +1,3 @@
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.Map;
 import javax.swing.*;
@@ -274,42 +273,112 @@ public class Dialogs {
     dialog.setVisible(true);
 }
     public static void editProgramDialog(String programCode, CProgramTable programTable) {
-
     JDialog dialog = new JDialog();
     dialog.setTitle("Edit Program");
-    dialog.setLayout(new FlowLayout());
+    dialog.setLayout(new GridLayout(4, 2)); // Changed to GridLayout for better organization
     
+    // Load current program data
+    ProgramDataManager.getProgramByCode(programCode);
+    
+    // Create form fields
     JTextField programNameField = new JTextField(20);
-    programNameField.setText(ProgramDataManager.getProgramName(programCode));
-
+    programNameField.setText(ProgramDataManager.getProgramName());
+    
     JTextField programCodeField = new JTextField(20);
-    programCodeField.setText(programCode);
-
+    programCodeField.setText(ProgramDataManager.getProgramCode());
+    
+    // Create college dropdown
+    JComboBox<String> collegeDropdown = new JComboBox<>();
+    Map<String, String> collegeMap = CollegeDataManager.loadCollegeMap();
+    
+    // Add default option
+    collegeDropdown.addItem("-- Select College --");
+    
+    // Add colleges to dropdown
+    for (Map.Entry<String, String> entry : collegeMap.entrySet()) {
+        collegeDropdown.addItem(entry.getValue() + " (" + entry.getKey() + ")");
+    }
+    
+    // Set current college as selected
+    String currentCollegeCode = ProgramDataManager.getCollegeCode();
+    if (currentCollegeCode != null) {
+        for (int i = 0; i < collegeDropdown.getItemCount(); i++) {
+            String item = collegeDropdown.getItemAt(i);
+            if (item.contains("(" + currentCollegeCode + ")")) {
+                collegeDropdown.setSelectedIndex(i);
+                break;
+            }
+        }
+    }
+    
+    // Add components to dialog
     dialog.add(new JLabel("Program Name:"));
     dialog.add(programNameField);
     dialog.add(new JLabel("Program Code:"));
     dialog.add(programCodeField);
-
+    dialog.add(new JLabel("College:"));
+    dialog.add(collegeDropdown);
+    
+    // Create buttons
     JButton saveButton = new JButton("Save");
     JButton cancelButton = new JButton("Cancel");
-
+    
     saveButton.addActionListener(e -> {
-        String newProgramName = programNameField.getText();
-        String newProgramCode = programCodeField.getText();
+        String newProgramName = programNameField.getText().trim();
+        String newProgramCode = programCodeField.getText().trim();
         
-        if (!ProgramDataManager.updateProgram(programCode, newProgramName, newProgramCode)) {
+        // Validate inputs
+        if (newProgramName.isEmpty() || newProgramCode.isEmpty()) {
             JOptionPane.showMessageDialog(dialog, 
-                "Failed to update program", 
-                "Error", 
+                "Program name and code cannot be empty", 
+                "Validation Error", 
                 JOptionPane.ERROR_MESSAGE);
-        } else {
+            return;
+        }
+        
+        // Validate college selection
+        if (collegeDropdown.getSelectedIndex() <= 0) {
+            JOptionPane.showMessageDialog(dialog, 
+                "Please select a college for this program", 
+                "Validation Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Extract college code from selected item
+        String selectedCollege = (String) collegeDropdown.getSelectedItem();
+        String collegeCode = selectedCollege.substring(
+            selectedCollege.lastIndexOf("(") + 1, 
+            selectedCollege.lastIndexOf(")")
+        );
+        
+        // Update program
+        if (ProgramDataManager.updateProgram(
+            programCode, 
+            newProgramName, 
+            newProgramCode, 
+            collegeCode
+        )) {
             programTable.refreshData();
             dialog.dispose();
+            JOptionPane.showMessageDialog(
+                dialog, 
+                "Program updated successfully", 
+                "Success", 
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        } else {
+            JOptionPane.showMessageDialog(
+                dialog, 
+                "Failed to update program", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     });
     
     cancelButton.addActionListener(e -> dialog.dispose());
-
+    
     dialog.add(saveButton);
     dialog.add(cancelButton);
     

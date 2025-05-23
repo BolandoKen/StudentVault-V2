@@ -214,19 +214,38 @@ public class CollegeDataManager {
     
     public static boolean deleteCollege(String code) {
         try (Connection conn = getConnection()) {
-            String sql = "DELETE FROM colleges WHERE college_code = ?";
-            
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, code);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            return rowsAffected > 0;
+            conn.setAutoCommit(false); // Begin transaction
+    
+            // Step 1: Update programs referencing this college
+            String updateSql = "UPDATE programs SET college_code = 'N/A' WHERE college_code = ?";
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                updateStmt.setString(1, code);
+                updateStmt.executeUpdate();
+            }
+    
+            // Step 2: Delete the college
+            String deleteSql = "DELETE FROM colleges WHERE college_code = ?";
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
+                deleteStmt.setString(1, code);
+                int rowsAffected = deleteStmt.executeUpdate();
+    
+                conn.commit(); // Commit if all went well
+                return rowsAffected > 0;
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                // Roll back in case of error
+                if (!getConnection().getAutoCommit()) {
+                    getConnection().rollback();
+                }
+            } catch (Exception rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             return false;
         }
     }
+    
     
     public static void clearFormData() {
         collegeName = null;
@@ -237,7 +256,7 @@ public class CollegeDataManager {
         Map<String, String> collegeMap = new HashMap<>();
         
         try (Connection conn = getConnection()) {
-            String sql = "SELECT college_code, college_name FROM colleges";
+            String sql = "SELECT college_code, college_name FROM colleges WHERE college_code <> 'N/A' ORDER BY college_code";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
             
