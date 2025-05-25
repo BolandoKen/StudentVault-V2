@@ -4,7 +4,6 @@ import javax.swing.*;
 public class GUI extends JFrame {
     private final CardLayout cardLayout;
     private final JPanel cardPanel;
-    private final PSearchPanel searchPanel;
     private final PAddStudentPanel addStudentPanel;
     private final PStudentTablePanel tablePanel;
     private final PCollegeTablePanel collegeTablePanel;
@@ -42,14 +41,6 @@ public class GUI extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0;
-        
-        // Add search panel
-        searchPanel = new PSearchPanel();
-        //searchPanel.setTablePanel(tablePanel);
-        
-        gbc.gridy = 0;
-        gbc.weighty = 0.02;
-        tableView.add(searchPanel, gbc);
         
         // Add table with scroll pane
         JScrollPane tableScrollPane = new JScrollPane(tablePanel);
