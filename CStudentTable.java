@@ -11,14 +11,13 @@ import javax.swing.table.DefaultTableModel;
 public class CStudentTable extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
-    private Map<Integer, String> collegeCodeMap;
-    private Map<Integer, String> programCodeMap;
+    private Map<String, String> programCodeMap; // Changed to String keys
 
     public CStudentTable() {
         setLayout(new BorderLayout());
         
         // Define column headers
-        String[] columns = {"First Name", "Last Name", "Gender", "ID Number", "Year Level", "College", "Program"};
+        String[] columns = {"First Name", "Last Name", "Gender", "ID Number", "Year Level", "Program"};
         
         // Create a table model that doesn't allow cell editing
         tableModel = new DefaultTableModel(columns, 0) {
@@ -39,34 +38,11 @@ public class CStudentTable extends JPanel {
         JScrollPane scrollPane = new JScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
         
-        // Load reference data for colleges and programs
-        loadCollegeMap();
+        // Load reference data for programs
         loadProgramMap();
         
         // Load student data
         loadStudentData();
-    }
-    
-    /**
-     * Loads college codes into a map for quick lookup
-     */
-    private void loadCollegeMap() {
-        collegeCodeMap = new HashMap<>();
-        
-        try (Connection conn = StudentDataManager.getConnection()) {
-            String sql = "SELECT college_id, college_code FROM colleges";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                int collegeId = rs.getInt("college_id");
-                String collegeCode = rs.getString("college_code");
-                collegeCodeMap.put(collegeId, collegeCode);
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("Error loading college data: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
     
     /**
@@ -76,14 +52,14 @@ public class CStudentTable extends JPanel {
         programCodeMap = new HashMap<>();
         
         try (Connection conn = StudentDataManager.getConnection()) {
-            String sql = "SELECT program_id, program_code FROM programs";
+            String sql = "SELECT program_code, program_name FROM programs";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                int programId = rs.getInt("program_id");
                 String programCode = rs.getString("program_code");
-                programCodeMap.put(programId, programCode);
+                String programName = rs.getString("program_name");
+                programCodeMap.put(programCode, programName);
             }
         } catch (SQLException | ClassNotFoundException e) {
             System.err.println("Error loading program data: " + e.getMessage());
@@ -99,7 +75,7 @@ public class CStudentTable extends JPanel {
         tableModel.setRowCount(0);
         
         try (Connection conn = StudentDataManager.getConnection()) {
-            String sql = "SELECT first_name, last_name, gender, id_number, year_level, college_id, program_id FROM students";
+            String sql = "SELECT first_name, last_name, gender, id_number, year_level, program_code FROM students";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
             
@@ -109,15 +85,18 @@ public class CStudentTable extends JPanel {
                 String gender = rs.getString("gender");
                 String idNumber = rs.getString("id_number");
                 String yearLevel = rs.getString("year_level");
-                int collegeId = rs.getInt("college_id");
-                int programId = rs.getInt("program_id");
+                String programCode = rs.getString("program_code");
                 
-                // Get college code and program code from maps
-                String collegeCode = collegeCodeMap.getOrDefault(collegeId, "Unknown");
-                String programCode = programCodeMap.getOrDefault(programId, "Unknown");
+                // Handle NULL program code
+                if (programCode == null) {
+                    programCode = "N/A";
+                }
+                
+                // Get program name from map, or use code if not found
+                String programDisplay = programCodeMap.getOrDefault(programCode, programCode);
                 
                 // Add row to table
-                Object[] rowData = {firstName, lastName, gender, idNumber, yearLevel, collegeCode, programCode};
+                Object[] rowData = {firstName, lastName, gender, idNumber, yearLevel, programDisplay};
                 tableModel.addRow(rowData);
             }
         } catch (SQLException | ClassNotFoundException e) {
@@ -126,53 +105,12 @@ public class CStudentTable extends JPanel {
         }
     }
     
-    /**
-     * Refreshes table data from the database
-     */
     public void refreshData() {
+        loadProgramMap(); // Refresh program data too
         loadStudentData();
     }
     
-    /**
-     * Returns the JTable component
-     */
     public JTable getTable() {
         return table;
-    }
-    
-    /**
-     * Deletes a student record
-     * @param row The row index to delete
-     * @return true if deletion was successful
-     */
-    public boolean deleteStudent(int row) {
-        if (row < 0 || row >= tableModel.getRowCount()) {
-            return false;
-        }
-        
-        String firstName = (String) tableModel.getValueAt(row, 0);
-        String lastName = (String) tableModel.getValueAt(row, 1);
-        String idNumber = (String) tableModel.getValueAt(row, 3);
-        
-        try (Connection conn = StudentDataManager.getConnection()) {
-            String sql = "DELETE FROM students WHERE first_name = ? AND last_name = ? AND id_number = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, firstName);
-            pstmt.setString(2, lastName);
-            pstmt.setString(3, idNumber);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            if (rowsAffected > 0) {
-                // Remove from table model
-                tableModel.removeRow(row);
-                return true;
-            }
-            return false;
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("Error deleting student: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
     }
 }

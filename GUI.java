@@ -4,7 +4,6 @@ import javax.swing.*;
 public class GUI extends JFrame {
     private final CardLayout cardLayout;
     private final JPanel cardPanel;
-    private final PAddStudentPanel addStudentPanel;
     private final PStudentTablePanel tablePanel;
     private final PCollegeTablePanel collegeTablePanel;
     private final PProgramTablePanel programTablePanel;
@@ -32,7 +31,7 @@ public class GUI extends JFrame {
         // Create table panels
         tablePanel = new PStudentTablePanel();
         collegeTablePanel = new PCollegeTablePanel();
-        //programTablePanel = new ProgramTablePanel();
+        programTablePanel = new PProgramTablePanel();
         
         // Create the main table view with search panel
         JPanel tableView = new JPanel(new GridBagLayout());
@@ -54,13 +53,9 @@ public class GUI extends JFrame {
         gbc.weighty = 0.98;
         tableView.add(tableScrollPane, gbc);
         
-        // Create add student panel
-        addStudentPanel = new PAddStudentPanel(this, tablePanel);
-        this.programTablePanel = new PProgramTablePanel();
-        
+     
         // Add all panels to card layout
         cardPanel.add(tableView, "TABLE");
-        cardPanel.add(addStudentPanel, "ADD_STUDENT");
         cardPanel.add(collegeTablePanel, "COLLEGETABLEPANEL");
         cardPanel.add(programTablePanel, "PROGRAMTABLEPANEL");
         

@@ -1,71 +1,146 @@
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
+import java.awt.*;
+import javax.swing.*;
 
 public class PStudentTablePanel extends JPanel{
 
     private CStudentTable studentTable;
+    private boolean selectionMode = false;
+    private JButton deleteButton;
+    private JButton cancelButton;
+    private JButton confirmDeleteButton;
+    private JPanel buttonsPanel;
+    private JButton editButton;
+
 
     public PStudentTablePanel() {
-        this.setBackground(Color.orange);
-        this.setLayout(new BorderLayout());
-
-        JButton editButton = new JButton("Edit");
-        JButton deleteButton = new JButton("Delete");
-
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(editButton);
-        buttonPanel.add(deleteButton);
-        this.add(buttonPanel, BorderLayout.NORTH);
-        
         studentTable = new CStudentTable();
-       editButton.addActionListener(e -> {
-        JTable table = studentTable.getTable();
-        int selectedRow = table.getSelectedRow();
-    
-        if (selectedRow != -1) {
-        String idNumber = table.getValueAt(selectedRow, 3).toString();
-        System.out.println("Selected ID Number: " + idNumber);
-        StudentDataManager.getStudentById(idNumber);
-        DEditStudentDialog dialog = new DEditStudentDialog(this, idNumber, studentTable);
-        dialog.setVisible(true);
-        SwingUtilities.invokeLater(() -> dialog.getRootPane().requestFocusInWindow());
-        } else {
-        JOptionPane.showMessageDialog(this, "Please select a row first.");
-        }
-    });
+
+        this.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+
+        JPanel searchPanelContainer = new JPanel(new BorderLayout());
+        searchPanelContainer.setOpaque(false);
+        gbc.gridy = 0;
+        gbc.weighty = 0.02;
+
+        //searchPanelContainer.add(searchPanel, BorderLayout.NORTH);
+        this.add(searchPanelContainer, gbc);
+
+        JPanel topRow = new JPanel(new GridBagLayout());
+        topRow.setOpaque(false);
+        topRow.setPreferredSize(new Dimension(1, 100));
+        gbc.gridy = 1;
+        gbc.weighty = 0.1;
+        this.add(topRow, gbc);
+
+        GridBagConstraints gbcTopRow = new GridBagConstraints();
+        gbcTopRow.fill = GridBagConstraints.BOTH;
+        gbcTopRow.gridy = 0; 
+        gbcTopRow.weightx = 0.5;
+        gbcTopRow.weighty = 1.0; 
+        gbcTopRow.anchor = GridBagConstraints.SOUTH; 
+
+        gbcTopRow.gridx = 0;
+        gbcTopRow.weightx = 0.5;
+        gbcTopRow.anchor = GridBagConstraints.WEST; 
+
+        //setup TopLeftPanel
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setOpaque(false); 
+        topRow.add(leftPanel, gbcTopRow);
+
+        gbcTopRow.gridx = 1;
+        gbcTopRow.weightx = 0.5; 
+        gbcTopRow.anchor = GridBagConstraints.EAST; 
+
+        //setup TopRightPanel
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setOpaque(false);
+        topRow.add(rightPanel, gbcTopRow);
+
+        buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 5));
+        buttonsPanel.setOpaque(false);
+        rightPanel.add(buttonsPanel, BorderLayout.SOUTH);
+
+        JButton addCollegeButton = new JButton(new ImageIcon("Assets/PlusIcon.png"));
+        addCollegeButton.setBorderPainted(false);
+        addCollegeButton.setFocusPainted(false);
+        addCollegeButton.setContentAreaFilled(false);
+        addCollegeButton.setBackground(new Color(0xE7E7E7));
+
+        addCollegeButton.addActionListener(e -> {
+            //Dialogs.addStudentDialog(studentTable);
+        });
+ 
+        deleteButton = new JButton(new ImageIcon("Assets/DeleteIcon.png"));
+        deleteButton.setBorderPainted(false);
+        deleteButton.setFocusPainted(false);
+        deleteButton.setContentAreaFilled(false);
+
         deleteButton.addActionListener(e -> {
             JTable table = studentTable.getTable();
             int selectedRow = table.getSelectedRow();
-    
+        
             if (selectedRow != -1) {
-                String idNumber = table.getValueAt(selectedRow, 3).toString();
-                System.out.println("Selected ID Number: " + idNumber);
-                StudentDataManager.deleteStudent(idNumber);
-                studentTable.refreshData();
+                Object idValue = table.getValueAt(selectedRow, 0);
+                if (idValue != null) {
+                    String collegeCode = idValue.toString();
+                    //Dialogs.deleteCollegeDialog(collegeCode, collegeTable); 
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "Please select a row first.");
+                JOptionPane.showMessageDialog(null, "Please select a college to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
             }
         });
-        this.add(studentTable, BorderLayout.CENTER);
-
-        studentTable.refreshData();
-
-    }  
     
-    public void refreshTable() {
-        if (studentTable != null) {
-            studentTable.refreshData();
-        }
+        editButton = new JButton(new ImageIcon("Assets/EditIcon.png"));
+        editButton.setBorderPainted(false);
+        editButton.setFocusPainted(false);
+        editButton.setContentAreaFilled(false);
+
+        editButton.addActionListener(e -> {
+            JTable table = studentTable.getTable();
+            int selectedRow = table.getSelectedRow();
+        
+            if (selectedRow != -1) {
+                Object idValue = table.getValueAt(selectedRow, 0);
+                if (idValue != null) {
+                    String collegeCode = idValue.toString();
+                    //Dialogs.editCollegeDialog(collegeCode, studentTable); 
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Please select a college to edit.", "No Selection", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+        
+        
+
+        buttonsPanel.add(addCollegeButton);
+        buttonsPanel.add(deleteButton);
+        buttonsPanel.add(editButton);
+
+        JLabel studentText = new JLabel("Students");
+        studentText.setFont(new Font("Helvetica", Font.BOLD, 32));
+        JPanel textContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        textContainer.setOpaque(false);
+
+        textContainer.add(studentText);
+        leftPanel.add(textContainer, BorderLayout.SOUTH);
+
+        JPanel bottomRow = new JPanel(new BorderLayout());
+        bottomRow.setOpaque(false); 
+        gbc.gridy = 2;
+        gbc.weighty = 0.9;
+        this.add(bottomRow, gbc);
+
+       
+    
+        JScrollPane scrollPane = new JScrollPane(studentTable);
+        bottomRow.add(scrollPane, BorderLayout.CENTER);
+    }
+    public JTable getTable() {
+        return studentTable.getTable();
     }
     
-    public CStudentTable getStudentTable() {
-        return studentTable;
-    }
-   
 }

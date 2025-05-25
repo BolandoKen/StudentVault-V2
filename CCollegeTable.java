@@ -51,9 +51,7 @@ public class CCollegeTable extends JPanel {
         loadCollegeData();
     }
     
-    /**
-     * Creates a panel with search components
-     */
+ 
     private JPanel createSearchPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         
@@ -84,10 +82,7 @@ public class CCollegeTable extends JPanel {
         
         return panel;
     }
-    
-    /**
-     * Performs the search based on the search field and column selection
-     */
+ 
     private void performSearch() {
         String searchText = searchField.getText().toLowerCase().trim();
         if (searchText.isEmpty()) {
@@ -119,24 +114,14 @@ public class CCollegeTable extends JPanel {
             sorter.setRowFilter(filter);
         }
     }
-    
-    /**
-     * Search by a specific term in all columns
-     * 
-     * @param searchTerm The term to search for
-     */
+  
     public void searchAllColumns(String searchTerm) {
         searchField.setText(searchTerm);
         searchColumnComboBox.setSelectedIndex(0); // All columns
         performSearch();
     }
     
-    /**
-     * Search in a specific column
-     * 
-     * @param searchTerm The term to search for
-     * @param columnName The name of the column to search in ("College Code" or "College Name")
-     */
+ 
     public void searchByColumn(String searchTerm, String columnName) {
         searchField.setText(searchTerm);
         
@@ -151,18 +136,12 @@ public class CCollegeTable extends JPanel {
         
         performSearch();
     }
-    
-    /**
-     * Clear the current search and show all rows
-     */
+   
     public void clearSearch() {
         searchField.setText("");
         performSearch();
     }
-    
-    /**
-     * Loads college data from database (updated for new table structure)
-     */
+
     private void loadCollegeData() {
     // Clear existing data
     tableModel.setRowCount(0);

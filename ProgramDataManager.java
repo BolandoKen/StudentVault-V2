@@ -149,18 +149,48 @@ public static boolean addProgram(String programName, String programCode, String 
     }
     
     public static boolean deleteProgram(String code) {
-        try (Connection conn = getConnection()) {
-            String sql = "DELETE FROM programs WHERE program_code = ?";
-            
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, code);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            return rowsAffected > 0;
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false); // Begin transaction
+    
+            // Step 1: Update students referencing this program
+            String updateStudentsSql = "UPDATE students SET program_code = 'N/A' WHERE program_code = ?";
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateStudentsSql)) {
+                updateStmt.setString(1, code);
+                updateStmt.executeUpdate();
+            }
+    
+            // Step 2: Delete the program
+            String deleteProgramSql = "DELETE FROM programs WHERE program_code = ?";
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteProgramSql)) {
+                deleteStmt.setString(1, code);
+                int rowsAffected = deleteStmt.executeUpdate();
+    
+                conn.commit(); // Commit if all went well
+                return rowsAffected > 0;
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                // Roll back in case of error
+                if (conn != null && !conn.getAutoCommit()) {
+                    conn.rollback();
+                }
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             return false;
+        } finally {
+            // Reset to default commit behavior and close connection
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
     

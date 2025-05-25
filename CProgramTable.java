@@ -39,17 +39,14 @@ public class CProgramTable extends JPanel {
         // Load program data
         loadProgramData();
     }
-    
-    /**
-     * Loads program data from database
-     */
+  
     private void loadProgramData() {
         // Clear existing data
         tableModel.setRowCount(0);
         
         try (Connection conn = ProgramDataManager.getConnection()) {
             // Updated SQL query to get college_code instead of college_id and removed program_id
-            String sql = "SELECT program_name, program_code, college_code FROM programs ORDER BY program_code";
+            String sql = "SELECT program_code, program_name, college_code FROM programs WHERE program_code <> 'N/A' ORDER BY program_code";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
             
@@ -67,38 +64,22 @@ public class CProgramTable extends JPanel {
             e.printStackTrace();
         }
     }
-    
-    /**
-     * Refreshes table data from the database
-     */
+
     public void refreshData() {
         loadProgramData();
     }
-    
-    /**
-     * Returns the JTable component
-     */
+  
     public JTable getTable() {
         return table;
     }
     
-    /**
-     * Gets the program code from the selected row
-     * @param row The selected row index
-     * @return The program code or null if invalid row
-     */
     public String getSelectedProgramCode(int row) {
         if (row >= 0 && row < tableModel.getRowCount()) {
             return (String) tableModel.getValueAt(row, 1);
         }
         return null;
     }
-    
-    /**
-     * Gets the college code from the selected row
-     * @param row The selected row index
-     * @return The college code or null if invalid row
-     */
+   
     public String getSelectedCollegeCode(int row) {
         if (row >= 0 && row < tableModel.getRowCount()) {
             return (String) tableModel.getValueAt(row, 2);
@@ -106,11 +87,6 @@ public class CProgramTable extends JPanel {
         return null;
     }
     
-    /**
-     * Gets the program name from the selected row
-     * @param row The selected row index
-     * @return The program name or null if invalid row
-     */
     public String getSelectedProgramName(int row) {
         if (row >= 0 && row < tableModel.getRowCount()) {
             return (String) tableModel.getValueAt(row, 0);

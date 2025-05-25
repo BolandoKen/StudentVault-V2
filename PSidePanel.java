@@ -2,8 +2,6 @@ import java.awt.*;
 import javax.swing.*;
 
 public class PSidePanel extends JPanel {
-    private final ImageIcon addIconDefault = new ImageIcon("Assets/AddStudentIcon.png");
-    private final ImageIcon addIconClicked = new ImageIcon("Assets/SelectedAddStudentIcon.png");
     private final ImageIcon tableIconDefault = new ImageIcon("Assets/StudentIcon.png");
     private final ImageIcon tableIconClicked = new ImageIcon("Assets/SelectedStudentIcon.png");
     private final ImageIcon collegeIconDefault = new ImageIcon("Assets/CollegeIcon.png");
@@ -27,22 +25,15 @@ public class PSidePanel extends JPanel {
         logo.setBorder(BorderFactory.createEmptyBorder(30, 0, 10, 0));
         logo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        addButton = createButton(addIconDefault);
         tableButton = createButton(tableIconDefault);
         collegeButton = createButton(collegeIconDefault);
         programButton = createButton(programIconDefault);
 
         this.add(logo);
-        this.add(addButton);
         this.add(collegeButton);
         this.add(programButton);
         this.add(tableButton);
        
-        addButton.addActionListener(e -> {
-            updateButtonState(addButton);
-            parentFrame.switchPanel("ADD_STUDENT");
-        });
-
         collegeButton.addActionListener(e -> {
             updateButtonState(collegeButton);
             parentFrame.switchPanel("COLLEGETABLEPANEL");
@@ -63,9 +54,7 @@ public class PSidePanel extends JPanel {
     private void updateButtonState(JButton clickedButton) {
         // Reset previously active button if exists
         if (activeButton != null && activeButton != clickedButton) {
-            if (activeButton == addButton) {
-                activeButton.setIcon(addIconDefault);
-            } else if (activeButton == tableButton) {
+            if (activeButton == tableButton) {
                 activeButton.setIcon(tableIconDefault);
             } else if (activeButton == collegeButton) {
                 activeButton.setIcon(collegeIconDefault);
@@ -77,9 +66,7 @@ public class PSidePanel extends JPanel {
         activeButton = clickedButton;
         
         // Set clicked button state
-        if (clickedButton == addButton) {
-            clickedButton.setIcon(addIconClicked);
-        } else if (clickedButton == tableButton) {
+        if (clickedButton == tableButton) {
             clickedButton.setIcon(tableIconClicked);
         } else if (clickedButton == collegeButton) {
             clickedButton.setIcon(collegeIconClicked);

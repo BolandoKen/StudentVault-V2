@@ -122,73 +122,7 @@ public class CButtons extends JButton {
                                               DEFAULT_CORNER_RADIUS, ADD_COLLEGE_SIZE);
         return button;
     }
-    
-    
-    public static CButtons createAddStudentButton(CStudentTable studentTable, GUI parentFrame, CButtons addButton, CButtons tableButton, CStudentForm studentForm) {
-        Color addButtonColor = new Color(0x5C2434);  
-        CButtons button = new CButtons("Add Student", addButtonColor, Color.WHITE, 
-                                              new Font("Helvetica", Font.PLAIN, 18), 
-                                              DEFAULT_CORNER_RADIUS, DEFAULT_SIZE);
 
-        button.addActionListener(e -> {
-        // Debug statement to check if studentForm is null
-        System.out.println("StudentForm is " + (studentForm == null ? "NULL" : "NOT NULL"));
-
-        if (!StudentDataManager.validateFields()) {
-            JOptionPane.showMessageDialog(null, 
-                "Please fill in all required fields.", 
-                "Missing Information", 
-                JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        boolean success = StudentDataManager.saveStudent();
-        
-        if (success) {
-            // Try to reset the form BEFORE switching panels
-            if (studentForm != null) {
-                System.out.println("Calling resetForm on studentForm");
-                studentForm.resetForm();
-            } else {
-                System.out.println("Cannot reset form - studentForm is null");
-            }
-            
-            // Also try explicitly clearing specific fields as a backup
-            try {
-                CRoundedTextField.clearAllFields();  // No arguments version if available
-                CRoundedComboBox.resetAllComboBoxes(); // No arguments version if available
-                System.out.println("Attempted to clear fields directly");
-            } catch (Exception ex) {
-                System.out.println("Error clearing fields directly: " + ex.getMessage());
-            }
-            
-            studentTable.refreshData();
-            
-            // Show success message
-            JOptionPane.showMessageDialog(null, 
-                "Student added successfully!", 
-                "Success", 
-                JOptionPane.INFORMATION_MESSAGE);
-            
-            // Clear form data via StudentDataManager
-            StudentDataManager.clearFormData();
-            System.out.println("StudentDataManager.clearFormData() called");
-            
-            // Switch panel AFTER resetting the form
-            parentFrame.switchPanel("TableCard");
-            System.out.println("Switched to TableCard");
-        } else {
-            JOptionPane.showMessageDialog(null, 
-                "Failed to add student. Please try again.", 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
-        }
-    });
-    
-    return button;
-    }
-
-
-    //Cancel Button
     public static CButtons createCancelButton(){
         Color addButtonColor = new Color(0xE7E7E7); 
         CButtons button = new CButtons("Cancel", addButtonColor, Color.BLACK, 
