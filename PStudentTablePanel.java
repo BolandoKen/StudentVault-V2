@@ -114,8 +114,6 @@ public class PStudentTablePanel extends JPanel{
             }
         });
         
-        
-
         buttonsPanel.add(addCollegeButton);
         buttonsPanel.add(deleteButton);
         buttonsPanel.add(editButton);
@@ -134,8 +132,6 @@ public class PStudentTablePanel extends JPanel{
         gbc.weighty = 0.9;
         this.add(bottomRow, gbc);
 
-       
-    
         JScrollPane scrollPane = new JScrollPane(studentTable);
         bottomRow.add(scrollPane, BorderLayout.CENTER);
     }

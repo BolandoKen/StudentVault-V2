@@ -75,10 +75,12 @@ public class CStudentTable extends JPanel {
         tableModel.setRowCount(0);
         
         try (Connection conn = StudentDataManager.getConnection()) {
-            String sql = "SELECT first_name, last_name, gender, id_number, year_level, program_code FROM students";
+            String sql = "SELECT first_name, last_name, gender, id as id_number, year_level, program_code FROM students";
             PreparedStatement pstmt = conn.prepareStatement(sql);
+            System.out.println("Executing query: " + sql);
             ResultSet rs = pstmt.executeQuery();
-            
+            System.out.println("Query executed, checking results...");
+
             while (rs.next()) {
                 String firstName = rs.getString("first_name");
                 String lastName = rs.getString("last_name");
@@ -86,6 +88,7 @@ public class CStudentTable extends JPanel {
                 String idNumber = rs.getString("id_number");
                 String yearLevel = rs.getString("year_level");
                 String programCode = rs.getString("program_code");
+                System.out.println("Found student: " + rs.getString("first_name") + " " + rs.getString("last_name"));
                 
                 // Handle NULL program code
                 if (programCode == null) {
