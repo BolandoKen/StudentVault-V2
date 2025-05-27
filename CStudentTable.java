@@ -61,15 +61,12 @@ public class CStudentTable extends JPanel {
                 String programName = rs.getString("program_name");
                 programCodeMap.put(programCode, programName);
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             System.err.println("Error loading program data: " + e.getMessage());
             e.printStackTrace();
         }
     }
     
-    /**
-     * Loads student data from database
-     */
     private void loadStudentData() {
         // Clear existing data
         tableModel.setRowCount(0);
@@ -102,7 +99,7 @@ public class CStudentTable extends JPanel {
                 Object[] rowData = {firstName, lastName, gender, idNumber, yearLevel, programDisplay};
                 tableModel.addRow(rowData);
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             System.err.println("Error loading student data: " + e.getMessage());
             e.printStackTrace();
         }

@@ -160,7 +160,7 @@ public class CCollegeTable extends JPanel {
             Object[] rowData = {collegeCode, collegeName};
             tableModel.addRow(rowData);
         }
-    } catch (SQLException | ClassNotFoundException e) {
+    } catch (SQLException e) {
         System.err.println("Error loading college data: " + e.getMessage());
         e.printStackTrace();
     }

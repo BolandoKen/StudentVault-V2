@@ -1,147 +1,140 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class StudentDataManager {
+    private static final Logger LOGGER = Logger.getLogger(StudentDataManager.class.getName());
     private static final String DB_URL = "jdbc:mysql://localhost:3306/StudentVault";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "root";
     
-    private static String firstName;
-    private static String lastName;
-    private static String gender;
-    private static String idNumber;
-    private static String yearLevel;
-    private static String programCode;
+    // Private constructor to prevent instantiation (utility class)
+    private StudentDataManager() {}
     
-    public static void setFirstName(String value) { firstName = value; }
-    public static String getFirstName() { return firstName; }
-    
-    public static void setLastName(String value) { lastName = value; }
-    public static String getLastName() { return lastName; }
-    
-    public static void setGender(String value) { gender = value; }
-    public static String getGender() { return gender; }
-    
-    public static void setIdNumber(String value) { idNumber = value; }
-    public static String getIdNumber() { return idNumber; }
-    
-    public static void setYearLevel(String value) { yearLevel = value; }
-    public static String getYearLevel() { return yearLevel; }
-    
-    public static void setProgramCode(String value) { programCode = value; }
-    public static String getProgramCode() { return programCode; }
- 
-    public static Connection getConnection() throws SQLException, ClassNotFoundException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+    public static Connection getConnection() throws SQLException {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        } catch (ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "MySQL JDBC Driver not found", e);
+            throw new SQLException("Database driver not found", e);
+        }
     }
     
-    public static boolean saveStudent() {
-        try (Connection conn = getConnection()) {
-            String sql = "INSERT INTO students (first_name, last_name, gender, id_number, year_level, program_code) " +
-                         "VALUES (?, ?, ?, ?, ?, ?)";
+    public static boolean saveStudent(Student student) {
+        if (!validateStudent(student)) {
+            return false;
+        }
+        
+        String sql = "INSERT INTO students (first_name, last_name, gender, id, year_level, program_code) " +
+                     "VALUES (?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, firstName);
-            pstmt.setString(2, lastName);
-            pstmt.setString(3, gender);
-            pstmt.setString(4, idNumber);
-            pstmt.setString(5, yearLevel);
-            pstmt.setString(6, programCode);
+            pstmt.setString(1, student.getFirstName());
+            pstmt.setString(2, student.getLastName());
+            pstmt.setString(3, student.getGender());
+            pstmt.setString(4, student.getIdNumber());
+            pstmt.setString(5, student.getYearLevel());
+            pstmt.setString(6, student.getProgramCode());
             
-            int rowsAffected = pstmt.executeUpdate();
-            
-            return rowsAffected > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error saving student", e);
             return false;
         }
     }
 
-    public static boolean getStudentById(String studentId) {
-        try (Connection conn = getConnection()) {
-            String sql = "SELECT first_name, last_name, gender, id_number, year_level, program_code " +
-                         "FROM students WHERE id_number = ?";
+    public static Student getStudentById(String studentId) {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            return null;
+        }
+        
+        String sql = "SELECT first_name, last_name, gender, id, year_level, program_code " +
+                     "FROM students WHERE id = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, studentId);
             
-            var resultSet = pstmt.executeQuery();
-            
-            if (resultSet.next()) {
-                // Load the retrieved data into the static fields
-                firstName = resultSet.getString("first_name");
-                lastName = resultSet.getString("last_name");
-                gender = resultSet.getString("gender");
-                idNumber = resultSet.getString("id_number");
-                yearLevel = resultSet.getString("year_level");
-                programCode = resultSet.getString("program_code");
-                
-                return true; // Student found and data loaded
-            } else {
-                return false; // Student not found
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Student(
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("gender"),
+                        rs.getString("id"),
+                        rs.getString("year_level"),
+                        rs.getString("program_code")
+                    );
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving student with ID: " + studentId, e);
         }
+        return null;
     }
 
-    public static boolean updateStudent(String studentId) {
-        try (Connection conn = getConnection()) {
-            String sql = "UPDATE students SET first_name = ?, last_name = ?, gender = ?, " +
-                         "year_level = ?, program_code = ? WHERE id_number = ?";
+    public static boolean updateStudent(Student student) {
+        if (!validateStudent(student)) {
+            return false;
+        }
+        
+        String sql = "UPDATE students SET first_name = ?, last_name = ?, gender = ?, " +
+                     "year_level = ?, program_code = ? WHERE id = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, firstName);
-            pstmt.setString(2, lastName);
-            pstmt.setString(3, gender);
-            pstmt.setString(4, yearLevel);
-            pstmt.setString(5, programCode);
-            pstmt.setString(6, studentId);
+            pstmt.setString(1, student.getFirstName());
+            pstmt.setString(2, student.getLastName());
+            pstmt.setString(3, student.getGender());
+            pstmt.setString(4, student.getYearLevel());
+            pstmt.setString(5, student.getProgramCode());
+            pstmt.setString(6, student.getIdNumber());
             
-            int rowsAffected = pstmt.executeUpdate();
-            
-            return rowsAffected > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating student", e);
             return false;
         }
     }
     
-    public static boolean validateFields() {
-        return firstName != null && !firstName.isEmpty() &&
-               lastName != null && !lastName.isEmpty() &&
-               gender != null && !gender.isEmpty() &&
-               idNumber != null && !idNumber.isEmpty() &&
-               yearLevel != null && !yearLevel.isEmpty() &&
-               programCode != null && !programCode.isEmpty();
-    }
-
     public static boolean deleteStudent(String studentId) {
-        try (Connection conn = getConnection()) {
-            String sql = "DELETE FROM students WHERE id_number = ?";
+        if (studentId == null || studentId.trim().isEmpty()) {
+            return false;
+        }
+        
+        String sql = "DELETE FROM students WHERE id = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, studentId);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            return rowsAffected > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error deleting student with ID: " + studentId, e);
             return false;
         }
     }
-
-    public static void clearFormData() {
-        firstName = null;
-        lastName = null;
-        gender = null;
-        idNumber = null;
-        yearLevel = null;
-        programCode = null;
+    
+    private static boolean validateStudent(Student student) {
+        return student != null &&
+               isNotBlank(student.getFirstName()) &&
+               isNotBlank(student.getLastName()) &&
+               isNotBlank(student.getGender()) &&
+               isNotBlank(student.getIdNumber()) &&
+               isNotBlank(student.getYearLevel()) &&
+               isNotBlank(student.getProgramCode());
+    }
+    
+    private static boolean isNotBlank(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 }

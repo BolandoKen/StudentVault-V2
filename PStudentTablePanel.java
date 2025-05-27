@@ -71,7 +71,7 @@ public class PStudentTablePanel extends JPanel{
         addCollegeButton.setBackground(new Color(0xE7E7E7));
 
         addCollegeButton.addActionListener(e -> {
-            //Dialogs.addStudentDialog(studentTable);
+            DStudentDialogs.addStudentDialog(studentTable);
         });
  
         deleteButton = new JButton(new ImageIcon("Assets/DeleteIcon.png"));
@@ -84,10 +84,10 @@ public class PStudentTablePanel extends JPanel{
             int selectedRow = table.getSelectedRow();
         
             if (selectedRow != -1) {
-                Object idValue = table.getValueAt(selectedRow, 0);
+                Object idValue = table.getValueAt(selectedRow, 3);
                 if (idValue != null) {
-                    String collegeCode = idValue.toString();
-                    //Dialogs.deleteCollegeDialog(collegeCode, collegeTable); 
+                    String studentId = idValue.toString();
+                    DStudentDialogs.deleteStudentDialog(studentId, studentTable); 
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Please select a college to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
@@ -104,10 +104,10 @@ public class PStudentTablePanel extends JPanel{
             int selectedRow = table.getSelectedRow();
         
             if (selectedRow != -1) {
-                Object idValue = table.getValueAt(selectedRow, 0);
+                Object idValue = table.getValueAt(selectedRow, 3);
                 if (idValue != null) {
-                    String collegeCode = idValue.toString();
-                    //Dialogs.editCollegeDialog(collegeCode, studentTable); 
+                    String studentId = idValue.toString();
+                    DStudentDialogs.editStudentDialog(studentId, studentTable);
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Please select a college to edit.", "No Selection", JOptionPane.WARNING_MESSAGE);
