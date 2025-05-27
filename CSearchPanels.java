@@ -14,35 +14,21 @@ public class CSearchPanels {
         private Consumer<String[]> searchCallback;
         private Timer searchTimer;
 
-        /**
-         * Constructs a college search panel
-         * 
-         * @param searchCallback Callback that receives search parameters [searchText, columnName]
-         *                       where columnName can be "All", "College Code", or "College Name"
-         */
         public CollegeSearchPanel(Consumer<String[]> searchCallback) {
             this.searchCallback = searchCallback;
             initializeUI();
         }
 
-        /**
-         * Default constructor - must set callback later using setSearchCallback
-         */
         public CollegeSearchPanel() {
             initializeUI();
         }
 
-        /**
-         * Sets up the UI components
-         */
         private void initializeUI() {
             setLayout(new FlowLayout(FlowLayout.LEFT));
             setBorder(BorderFactory.createTitledBorder("Search Colleges"));
 
-            // Create search field
             searchField = new JTextField(20);
-            
-            // Add document listener for live search
+
             searchField.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
@@ -60,15 +46,12 @@ public class CSearchPanels {
                 }
             });
 
-            // Create column selector for search
             searchColumnComboBox = new JComboBox<>(new String[]{"All", "College Code", "College Name"});
             searchColumnComboBox.addActionListener(e -> performSearch());
 
-            // Create search button (still available for explicit search if needed)
             searchButton = new JButton("Search");
             searchButton.addActionListener(e -> performSearch());
 
-            // Create clear button
             clearButton = new JButton("Clear");
             clearButton.addActionListener(e -> {
                 searchField.setText("");
@@ -76,7 +59,6 @@ public class CSearchPanels {
                 performSearch();
             });
 
-            // Add components to panel
             add(new JLabel("Search:"));
             add(searchField);
             add(new JLabel("in"));
@@ -84,14 +66,10 @@ public class CSearchPanels {
             add(searchButton);
             add(clearButton);
 
-            // Initialize search timer for delayed search
             searchTimer = new Timer(300, e -> performSearch());
             searchTimer.setRepeats(false);
         }
 
-        /**
-         * Triggers a delayed search after user stops typing
-         */
         private void triggerDelayedSearch() {
             if (searchTimer.isRunning()) {
                 searchTimer.stop();
@@ -99,18 +77,10 @@ public class CSearchPanels {
             searchTimer.start();
         }
 
-        /**
-         * Sets the search callback
-         * 
-         * @param searchCallback Callback that receives search parameters [searchText, columnName]
-         */
         public void setSearchCallback(Consumer<String[]> searchCallback) {
             this.searchCallback = searchCallback;
         }
 
-        /**
-         * Performs the search by calling the callback with current search parameters
-         */
         private void performSearch() {
             if (searchCallback == null) {
                 return;
@@ -122,20 +92,10 @@ public class CSearchPanels {
             searchCallback.accept(new String[]{searchText, columnName});
         }
 
-        /**
-         * Sets the search text programmatically
-         * 
-         * @param text The text to search for
-         */
         public void setSearchText(String text) {
             searchField.setText(text);
         }
 
-        /**
-         * Sets the search column programmatically
-         * 
-         * @param columnName The column to search in ("All", "College Code", or "College Name")
-         */
         public void setSearchColumn(String columnName) {
             for (int i = 0; i < searchColumnComboBox.getItemCount(); i++) {
                 if (searchColumnComboBox.getItemAt(i).equals(columnName)) {
@@ -145,36 +105,20 @@ public class CSearchPanels {
             }
         }
 
-        /**
-         * Clears the search criteria
-         */
         public void clearSearch() {
             searchField.setText("");
             searchColumnComboBox.setSelectedIndex(0);
             performSearch();
         }
 
-        /**
-         * Executes the search with current parameters
-         */
         public void executeSearch() {
             performSearch();
         }
 
-        /**
-         * Gets the current search text
-         * 
-         * @return The current search text
-         */
         public String getSearchText() {
             return searchField.getText();
         }
 
-        /**
-         * Gets the currently selected column for searching
-         * 
-         * @return The selected column name
-         */
         public String getSelectedColumn() {
             return (String) searchColumnComboBox.getSelectedItem();
         }
@@ -222,6 +166,124 @@ public class CSearchPanels {
         });
 
         searchColumnComboBox = new JComboBox<>(new String[]{"All", "Program Code", "Program Name", "College Code"});
+        searchColumnComboBox.addActionListener(e -> performSearch());
+
+        searchButton = new JButton("Search");
+        searchButton.addActionListener(e -> performSearch());
+
+        clearButton = new JButton("Clear");
+        clearButton.addActionListener(e -> {
+            searchField.setText("");
+            searchColumnComboBox.setSelectedIndex(0);
+            performSearch();
+        });
+
+        add(new JLabel("Search:"));
+        add(searchField);
+        add(new JLabel("in"));
+        add(searchColumnComboBox);
+        add(searchButton);
+        add(clearButton);
+
+        searchTimer = new Timer(300, e -> performSearch());
+        searchTimer.setRepeats(false);
+    }
+
+    private void triggerDelayedSearch() {
+        if (searchTimer.isRunning()) {
+            searchTimer.stop();
+        }
+        searchTimer.start();
+    }
+
+    public void setSearchCallback(Consumer<String[]> searchCallback) {
+        this.searchCallback = searchCallback;
+    }
+
+    private void performSearch() {
+        if (searchCallback == null) {
+            return;
+        }
+
+        String searchText = searchField.getText().trim();
+        String columnName = (String) searchColumnComboBox.getSelectedItem();
+        
+        searchCallback.accept(new String[]{searchText, columnName});
+    }
+
+    public void setSearchText(String text) {
+        searchField.setText(text);
+    }
+
+    public void setSearchColumn(String columnName) {
+        for (int i = 0; i < searchColumnComboBox.getItemCount(); i++) {
+            if (searchColumnComboBox.getItemAt(i).equals(columnName)) {
+                searchColumnComboBox.setSelectedIndex(i);
+                break;
+            }
+        }
+    }
+
+    public void clearSearch() {
+        searchField.setText("");
+        searchColumnComboBox.setSelectedIndex(0);
+        performSearch();
+    }
+
+    public void executeSearch() {
+        performSearch();
+    }
+
+    public String getSearchText() {
+        return searchField.getText();
+    }
+
+    public String getSelectedColumn() {
+        return (String) searchColumnComboBox.getSelectedItem();
+    }
+}
+
+    public static class StudentSearchPanel extends JPanel {
+    private JTextField searchField;
+    private JComboBox<String> searchColumnComboBox;
+    private JButton searchButton;
+    private JButton clearButton;
+    private Consumer<String[]> searchCallback;
+    private Timer searchTimer;
+
+    public StudentSearchPanel(Consumer<String[]> searchCallback) {
+        this.searchCallback = searchCallback;
+        initializeUI();
+    }
+
+    public StudentSearchPanel() {
+        initializeUI();
+    }
+
+    private void initializeUI() {
+        setLayout(new FlowLayout(FlowLayout.LEFT));
+        setBorder(BorderFactory.createTitledBorder("Search Students"));
+
+        searchField = new JTextField(20);
+
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                triggerDelayedSearch();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                triggerDelayedSearch();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                triggerDelayedSearch();
+            }
+        });
+
+        searchColumnComboBox = new JComboBox<>(new String[]{"All", "First Name", "Last Name", "ID Number", "Year Level", "Program"});
         searchColumnComboBox.addActionListener(e -> performSearch());
 
         searchButton = new JButton("Search");

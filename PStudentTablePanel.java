@@ -1,5 +1,6 @@
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class PStudentTablePanel extends JPanel{
 
@@ -10,11 +11,17 @@ public class PStudentTablePanel extends JPanel{
     private JButton confirmDeleteButton;
     private JPanel buttonsPanel;
     private JButton editButton;
-
+    private CSearchPanels.StudentSearchPanel searchPanel;
 
     public PStudentTablePanel() {
         studentTable = new CStudentTable();
 
+        searchPanel = new CSearchPanels.StudentSearchPanel(searchTerms -> {
+            String searchText = searchTerms[0];
+            String columnName = searchTerms[1];
+            filterStudentTable(searchText, columnName);
+        });
+    
         this.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -25,7 +32,7 @@ public class PStudentTablePanel extends JPanel{
         gbc.gridy = 0;
         gbc.weighty = 0.02;
 
-        //searchPanelContainer.add(searchPanel, BorderLayout.NORTH);
+        searchPanelContainer.add(searchPanel, BorderLayout.NORTH);
         this.add(searchPanelContainer, gbc);
 
         JPanel topRow = new JPanel(new GridBagLayout());
@@ -90,7 +97,7 @@ public class PStudentTablePanel extends JPanel{
                     DStudentDialogs.deleteStudentDialog(studentId, studentTable); 
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Please select a college to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Please select a student to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
             }
         });
     
@@ -110,7 +117,7 @@ public class PStudentTablePanel extends JPanel{
                     DStudentDialogs.editStudentDialog(studentId, studentTable);
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Please select a college to edit.", "No Selection", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Please select a student to edit.", "No Selection", JOptionPane.WARNING_MESSAGE);
             }
         });
         
@@ -138,5 +145,54 @@ public class PStudentTablePanel extends JPanel{
     public JTable getTable() {
         return studentTable.getTable();
     }
+    private void filterStudentTable(String searchText, String columnName) {
+    if (searchText.isEmpty()) {
+        // If search is empty, refresh to show all data
+        studentTable.refreshData();
+        return;
+    }
+    
+    // Get the table model
+    DefaultTableModel model = (DefaultTableModel) studentTable.getTable().getModel();
+    
+    // Store original data if needed, or reload from database with filter
+    // For now, we'll filter the existing table data
+    JTable table = studentTable.getTable();
+    javax.swing.RowFilter<Object, Object> rf = null;
+    
+    try {
+        if ("All".equals(columnName)) {
+            // Search all columns
+            rf = javax.swing.RowFilter.regexFilter("(?i)" + searchText);
+        } else {
+            // Search specific column
+            int columnIndex = getColumnIndex(columnName);
+            if (columnIndex != -1) {
+                rf = javax.swing.RowFilter.regexFilter("(?i)" + searchText, columnIndex);
+            }
+        }
+    } catch (java.util.regex.PatternSyntaxException e) {
+        return; // If regex is invalid, don't filter
+    }
+    
+    // Apply the filter
+    javax.swing.table.TableRowSorter<DefaultTableModel> sorter = 
+        new javax.swing.table.TableRowSorter<>(model);
+    table.setRowSorter(sorter);
+    sorter.setRowFilter(rf);
+}
+
+// Helper method to get column index by name
+private int getColumnIndex(String columnName) {
+    switch (columnName) {
+        case "First Name": return 0;
+        case "Last Name": return 1;
+        case "Gender": return 2;
+        case "ID Number": return 3;
+        case "Year Level": return 4;
+        case "Program": return 5;
+        default: return -1;
+    }
+}
     
 }
