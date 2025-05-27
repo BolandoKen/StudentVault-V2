@@ -106,6 +106,38 @@ public class StudentDataManager {
         }
     }
     
+    /**
+     * Updates a student record allowing the ID to be changed
+     * @param originalId The original student ID to locate the record
+     * @param student The updated student object with potentially new ID
+     * @return true if update was successful, false otherwise
+     */
+    public static boolean updateStudentWithIdChange(String originalId, Student student) {
+        if (!validateStudent(student) || originalId == null || originalId.trim().isEmpty()) {
+            return false;
+        }
+        
+        String sql = "UPDATE students SET first_name = ?, last_name = ?, gender = ?, " +
+                     "id = ?, year_level = ?, program_code = ? WHERE id = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, student.getFirstName());
+            pstmt.setString(2, student.getLastName());
+            pstmt.setString(3, student.getGender());
+            pstmt.setString(4, student.getIdNumber()); // New ID
+            pstmt.setString(5, student.getYearLevel());
+            pstmt.setString(6, student.getProgramCode());
+            pstmt.setString(7, originalId); // Original ID for WHERE clause
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating student with ID change", e);
+            return false;
+        }
+    }
+    
     public static boolean deleteStudent(String studentId) {
         if (studentId == null || studentId.trim().isEmpty()) {
             return false;
