@@ -83,7 +83,7 @@ public class GUI extends JFrame {
         // Refresh data before showing the panel if needed
         switch (panelName) {
             case "TABLE":
-             
+                tablePanel.getStudentTable().refreshData();
                 break;
             case "COLLEGETABLEPANEL":
                
