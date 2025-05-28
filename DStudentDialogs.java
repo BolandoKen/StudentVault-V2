@@ -213,7 +213,6 @@ public class DStudentDialogs {
         dialog.setTitle("Edit Student");
         dialog.setLayout(new GridLayout(8, 2));
         
-        // Load current student data
         Student student = StudentDataManager.getStudentById(studentId);
         if (student == null) {
             JOptionPane.showMessageDialog(
@@ -249,7 +248,7 @@ public class DStudentDialogs {
       
 JTextField idNumberField = new JTextField(20);
 // Set the text FIRST, before applying the document filter
-idNumberField.setText(student.getIdNumber());
+idNumberField.setText(studentId);
 idNumberField.setDocument(new PlainDocument() {
     @Override
     public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {

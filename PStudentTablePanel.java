@@ -145,6 +145,7 @@ public class PStudentTablePanel extends JPanel{
     public JTable getTable() {
         return studentTable.getTable();
     }
+    
     private void filterStudentTable(String searchText, String columnName) {
     if (searchText.isEmpty()) {
         // If search is empty, refresh to show all data

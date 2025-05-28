@@ -45,9 +45,6 @@ public class CStudentTable extends JPanel {
         loadStudentData();
     }
     
-    /**
-     * Loads program codes into a map for quick lookup
-     */
     private void loadProgramMap() {
         programCodeMap = new HashMap<>();
         

@@ -3,14 +3,11 @@ import javax.swing.*;
 
 public final class PCollegeTablePanel extends JPanel {
     private CCollegeTable collegeTable;
-    private boolean selectionMode = false;
-    private JButton deleteButton;
-    private JButton cancelButton;
-    private JButton confirmDeleteButton;
-    private JPanel buttonsPanel;
-    private JButton editButton;
-    private CSearchPanels.CollegeSearchPanel searchPanel;
-
+    private final JButton deleteButton;
+    private final JPanel buttonsPanel;
+    private final JButton editButton;
+    private final CSearchPanels.CollegeSearchPanel searchPanel;
+    
     public PCollegeTablePanel() {
         collegeTable = new CCollegeTable();
 
@@ -25,19 +22,10 @@ public final class PCollegeTablePanel extends JPanel {
         gbc.weighty = 0.02;
 
         searchPanel = new CSearchPanels.CollegeSearchPanel(params -> {
+            System.out.println("PCollegeTablePanel: Callback received - " + params[0] + ", " + params[1]);
             String searchText = params[0];
             String columnName = params[1];
-            
-            if (searchText.isEmpty()) {
-                collegeTable.clearSearch();
-                return;
-            }
-            
-            if (columnName.equals("All")) {
-                collegeTable.searchAllColumns(searchText);
-            } else {
-                collegeTable.searchByColumn(searchText, columnName);
-            }
+            collegeTable.applySearchFilter(searchText, columnName);
         });
 
         searchPanelContainer.add(searchPanel, BorderLayout.NORTH);
@@ -129,8 +117,6 @@ public final class PCollegeTablePanel extends JPanel {
             }
         });
         
-        
-
         buttonsPanel.add(addCollegeButton);
         buttonsPanel.add(deleteButton);
         buttonsPanel.add(editButton);
@@ -149,10 +135,7 @@ public final class PCollegeTablePanel extends JPanel {
         gbc.weighty = 0.9;
         this.add(bottomRow, gbc);
 
-       
-    
-        JScrollPane scrollPane = new JScrollPane(collegeTable);
-        bottomRow.add(scrollPane, BorderLayout.CENTER);
+        bottomRow.add(collegeTable, BorderLayout.CENTER);
     }
     public JTable getTable() {
         return collegeTable.getTable();
