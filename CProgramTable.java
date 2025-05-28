@@ -10,7 +10,8 @@ import javax.swing.table.TableRowSorter;
 public class CProgramTable extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
-
+    private TableRowSorter<DefaultTableModel> sorter;
+    
     public CProgramTable() {
         setLayout(new BorderLayout());
         
@@ -28,6 +29,9 @@ public class CProgramTable extends JPanel {
         // Create table with the model
         table = new JTable(tableModel);
         
+        sorter = new TableRowSorter<>(tableModel);
+        table.setRowSorter(sorter);
+
         table.setRowHeight(25);
         table.setFont(new Font("Helvetica", Font.PLAIN, 14));
         table.getTableHeader().setFont(new Font("Helvetica", Font.BOLD, 14));
@@ -75,62 +79,65 @@ public class CProgramTable extends JPanel {
     
     public String getSelectedProgramCode(int row) {
         if (row >= 0 && row < tableModel.getRowCount()) {
-            return (String) tableModel.getValueAt(row, 1);
+            // Convert view row to model row in case table is sorted
+            int modelRow = table.convertRowIndexToModel(row);
+            return (String) tableModel.getValueAt(modelRow, 1);
         }
         return null;
     }
    
     public String getSelectedCollegeCode(int row) {
         if (row >= 0 && row < tableModel.getRowCount()) {
-            return (String) tableModel.getValueAt(row, 2);
+            // Convert view row to model row in case table is sorted
+            int modelRow = table.convertRowIndexToModel(row);
+            return (String) tableModel.getValueAt(modelRow, 2);
         }
         return null;
     }
     
     public String getSelectedProgramName(int row) {
         if (row >= 0 && row < tableModel.getRowCount()) {
-            return (String) tableModel.getValueAt(row, 0);
+            // Convert view row to model row in case table is sorted
+            int modelRow = table.convertRowIndexToModel(row);
+            return (String) tableModel.getValueAt(modelRow, 0);
         }
         return null;
     }
+
     public void clearSearch() {
-        // Clear the row sorter completely
-        getTable().setRowSorter(null);
-        // Refresh the data to show all records
-        refreshData();
+        // Clear any row filter but keep the sorter for sorting functionality
+        if (sorter != null) {
+            sorter.setRowFilter(null);
+        }
     }
 
     public void searchAllColumns(String searchText) {
-    DefaultTableModel model = (DefaultTableModel) getTable().getModel();
-    TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
-    getTable().setRowSorter(sorter);
-    RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText);
-    sorter.setRowFilter(filter);
-}
+        if (sorter != null) {
+            RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText);
+            sorter.setRowFilter(filter);
+        }
+    }
 
     public void searchByColumn(String searchText, String columnName) {
-    DefaultTableModel model = (DefaultTableModel) getTable().getModel();
-    TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
-    getTable().setRowSorter(sorter);
-    
-    int columnIndex = -1;
-    switch (columnName) {
-        case "Program Code":
-            columnIndex = 1;
-            break;
-        case "Program Name":
-            columnIndex = 0;
-            break;
-        case "College Code":
-            columnIndex = 2;
-            break;
-    }
-    
-    if (columnIndex >= 0) {
-        RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText, columnIndex);
-        sorter.setRowFilter(filter);
+        if (sorter != null) {
+            int columnIndex = -1;
+            switch (columnName) {
+                case "Program Code":
+                    columnIndex = 1;
+                    break;
+                case "Program Name":
+                    columnIndex = 0;
+                    break;
+                case "College Code":
+                    columnIndex = 2;
+                    break;
+            }
+            
+            if (columnIndex >= 0) {
+                RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText, columnIndex);
+                sorter.setRowFilter(filter);
+            }
+        }
     }
 }
-
     
-}

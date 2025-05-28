@@ -28,34 +28,18 @@ public final class PProgramTablePanel extends JPanel {
             String columnName = params[1];
             
             if (searchText.isEmpty()) {
-                // Clear the row sorter first, then refresh data
-                programTable.getTable().setRowSorter(null);
-                programTable.refreshData();
+                // Clear the search filter but keep sorting functionality
+                programTable.clearSearch();
                 return;
             }
             
-            // Convert the column name to match database column names if needed
-            String dbColumnName = "";
-            switch (columnName) {
-                case "Program Code":
-                    dbColumnName = "program_code";
-                    break;
-                case "Program Name":
-                    dbColumnName = "program_name";
-                    break;
-                case "College Code":
-                    dbColumnName = "college_code";
-                    break;
-                case "All":
-                default:
-                    dbColumnName = "all";
-                    break;
+            // Use the search methods from CProgramTable
+            if (columnName.equals("All")) {
+                programTable.searchAllColumns(searchText);
+            } else {
+                programTable.searchByColumn(searchText, columnName);
             }
-            
-            // Filter the table based on search criteria
-            filterProgramTable(searchText, dbColumnName);
         });
-        
         
         searchPanelContainer.add(programSearchPanel, BorderLayout.NORTH);
         this.add(searchPanelContainer, gbc);
