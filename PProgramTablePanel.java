@@ -28,7 +28,9 @@ public final class PProgramTablePanel extends JPanel {
             String columnName = params[1];
             
             if (searchText.isEmpty()) {
-                programTable.refreshData(); // Clear search by refreshing original data
+                // Clear the row sorter first, then refresh data
+                programTable.getTable().setRowSorter(null);
+                programTable.refreshData();
                 return;
             }
             
@@ -53,6 +55,7 @@ public final class PProgramTablePanel extends JPanel {
             // Filter the table based on search criteria
             filterProgramTable(searchText, dbColumnName);
         });
+        
         
         searchPanelContainer.add(programSearchPanel, BorderLayout.NORTH);
         this.add(searchPanelContainer, gbc);

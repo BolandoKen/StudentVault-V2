@@ -94,11 +94,11 @@ public class CProgramTable extends JPanel {
         return null;
     }
     public void clearSearch() {
-    TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) getTable().getRowSorter();
-    if (sorter != null) {
-        sorter.setRowFilter(null);
+        // Clear the row sorter completely
+        getTable().setRowSorter(null);
+        // Refresh the data to show all records
+        refreshData();
     }
-}
 
     public void searchAllColumns(String searchText) {
     DefaultTableModel model = (DefaultTableModel) getTable().getModel();
