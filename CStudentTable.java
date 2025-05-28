@@ -7,11 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 public class CStudentTable extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private Map<String, String> programCodeMap; // Changed to String keys
+    private TableRowSorter<DefaultTableModel> sorter;
 
     public CStudentTable() {
         setLayout(new BorderLayout());
@@ -29,6 +31,9 @@ public class CStudentTable extends JPanel {
         
         // Create table with the model
         table = new JTable(tableModel);
+
+        sorter = new TableRowSorter<>(tableModel);
+        table.setRowSorter(sorter);
         
         table.setRowHeight(25);
         table.setFont(new Font("Helvetica", Font.PLAIN, 14));
@@ -109,5 +114,70 @@ public class CStudentTable extends JPanel {
     
     public JTable getTable() {
         return table;
+    }
+    
+    // Add search and filter methods
+    public void clearSearch() {
+        // Clear any row filter but keep the sorter for sorting functionality
+        if (sorter != null) {
+            sorter.setRowFilter(null);
+        }
+    }
+
+    public void searchAllColumns(String searchText) {
+        if (sorter != null) {
+            RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText);
+            sorter.setRowFilter(filter);
+        }
+    }
+
+    public void searchByColumn(String searchText, String columnName) {
+        if (sorter != null) {
+            int columnIndex = getColumnIndex(columnName);
+            
+            if (columnIndex >= 0) {
+                RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + searchText, columnIndex);
+                sorter.setRowFilter(filter);
+            }
+        }
+    }
+    
+    // Helper method to get column index by name
+    private int getColumnIndex(String columnName) {
+        switch (columnName) {
+            case "First Name": return 0;
+            case "Last Name": return 1;
+            case "Gender": return 2;
+            case "ID Number": return 3;
+            case "Year Level": return 4;
+            case "Program": return 5;
+            default: return -1;
+        }
+    }
+    
+    // Helper methods for getting selected row data (accounting for sorting)
+    public String getSelectedStudentId(int row) {
+        if (row >= 0 && row < table.getRowCount()) {
+            // Convert view row to model row in case table is sorted
+            int modelRow = table.convertRowIndexToModel(row);
+            return (String) tableModel.getValueAt(modelRow, 3); // ID Number is column 3
+        }
+        return null;
+    }
+    
+    public String getSelectedFirstName(int row) {
+        if (row >= 0 && row < table.getRowCount()) {
+            int modelRow = table.convertRowIndexToModel(row);
+            return (String) tableModel.getValueAt(modelRow, 0);
+        }
+        return null;
+    }
+    
+    public String getSelectedLastName(int row) {
+        if (row >= 0 && row < table.getRowCount()) {
+            int modelRow = table.convertRowIndexToModel(row);
+            return (String) tableModel.getValueAt(modelRow, 1);
+        }
+        return null;
     }
 }

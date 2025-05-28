@@ -5,13 +5,10 @@ import javax.swing.table.DefaultTableModel;
 public class PStudentTablePanel extends JPanel{
 
     private CStudentTable studentTable;
-    private boolean selectionMode = false;
-    private JButton deleteButton;
-    private JButton cancelButton;
-    private JButton confirmDeleteButton;
-    private JPanel buttonsPanel;
-    private JButton editButton;
-    private CSearchPanels.StudentSearchPanel searchPanel;
+    private final JButton deleteButton;
+    private final JPanel buttonsPanel;
+    private final JButton editButton;
+    private final CSearchPanels.StudentSearchPanel searchPanel;
 
     public PStudentTablePanel() {
         studentTable = new CStudentTable();
@@ -19,7 +16,19 @@ public class PStudentTablePanel extends JPanel{
         searchPanel = new CSearchPanels.StudentSearchPanel(searchTerms -> {
             String searchText = searchTerms[0];
             String columnName = searchTerms[1];
-            filterStudentTable(searchText, columnName);
+            
+            if (searchText.isEmpty()) {
+                // Clear the search filter but keep sorting functionality
+                studentTable.clearSearch();
+                return;
+            }
+            
+            // Use the search methods from CStudentTable
+            if (columnName.equals("All")) {
+                studentTable.searchAllColumns(searchText);
+            } else {
+                studentTable.searchByColumn(searchText, columnName);
+            }
         });
     
         this.setLayout(new GridBagLayout());
@@ -91,9 +100,9 @@ public class PStudentTablePanel extends JPanel{
             int selectedRow = table.getSelectedRow();
         
             if (selectedRow != -1) {
-                Object idValue = table.getValueAt(selectedRow, 3);
-                if (idValue != null) {
-                    String studentId = idValue.toString();
+                // Use the helper method to get the correct student ID even when sorted
+                String studentId = studentTable.getSelectedStudentId(selectedRow);
+                if (studentId != null) {
                     DStudentDialogs.deleteStudentDialog(studentId, studentTable); 
                 }
             } else {
@@ -111,9 +120,9 @@ public class PStudentTablePanel extends JPanel{
             int selectedRow = table.getSelectedRow();
         
             if (selectedRow != -1) {
-                Object idValue = table.getValueAt(selectedRow, 3);
-                if (idValue != null) {
-                    String studentId = idValue.toString();
+                // Use the helper method to get the correct student ID even when sorted
+                String studentId = studentTable.getSelectedStudentId(selectedRow);
+                if (studentId != null) {
                     DStudentDialogs.editStudentDialog(studentId, studentTable);
                 }
             } else {
@@ -184,7 +193,7 @@ public class PStudentTablePanel extends JPanel{
 }
 
 // Helper method to get column index by name
-private int getColumnIndex(String columnName) {
+    private int getColumnIndex(String columnName) {
     switch (columnName) {
         case "First Name": return 0;
         case "Last Name": return 1;
@@ -195,5 +204,7 @@ private int getColumnIndex(String columnName) {
         default: return -1;
     }
 }
-    
+    public CStudentTable getStudentTable() {
+    return studentTable;
+}
 }
