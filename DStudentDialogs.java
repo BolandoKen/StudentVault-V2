@@ -131,6 +131,23 @@ public class DStudentDialogs {
                     JOptionPane.ERROR_MESSAGE);
                 return;
             }
+    
+        // ====== NEW VALIDATION: No special characters in names ======
+        if (!firstName.matches("[a-zA-Z\\s]+")) {
+            JOptionPane.showMessageDialog(dialog, 
+                "First Name can only contain letters and spaces", 
+                "Validation Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        if (!lastName.matches("[a-zA-Z\\s]+")) {
+            JOptionPane.showMessageDialog(dialog, 
+                "Last Name can only contain letters and spaces", 
+                "Validation Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
             
             // Validate ID number format (0000-0000)
             if (!idNumber.matches("\\d{4}-\\d{4}")) {
@@ -245,32 +262,22 @@ public class DStudentDialogs {
             }
         }
         
-      
+// Create ID number field with input verification
 JTextField idNumberField = new JTextField(20);
-// Set the text FIRST, before applying the document filter
-idNumberField.setText(studentId);
 idNumberField.setDocument(new PlainDocument() {
     @Override
     public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-        // Only allow digits and hyphen in specific position
-        if (str.matches("[0-9-]+")) {
-            String currentText = getText(0, getLength());
-            String newText = currentText.substring(0, offs) + str + currentText.substring(offs);
-            
-            // Enforce 0000-0000 format
-            if (newText.length() > 9) return; // Max length is 9 (8 digits + 1 hyphen)
-            if (newText.length() == 5 && !newText.substring(4, 5).equals("-")) {
-                super.insertString(offs, "-", a);
-                if (str.length() > 0) {
-                    super.insertString(offs + 1, str, a);
-                }
-            } else {
-                super.insertString(offs, str.replaceAll("[^0-9]", ""), a);
-            }
+        String currentText = getText(0, getLength());
+        String newText = currentText.substring(0, offs) + str + currentText.substring(offs);
+        
+        // Only allow digits and exactly one hyphen in position 4
+        if (newText.matches("^\\d{0,4}-?\\d{0,4}$")) {
+            super.insertString(offs, str, a);
         }
     }
 });
-        
+idNumberField.setText(student.getIdNumber());
+
         // Create year level dropdown with current selection
         JComboBox<String> yearLevelDropdown = new JComboBox<>();
         yearLevelDropdown.addItem("-- Select Year Level --");
@@ -401,8 +408,31 @@ idNumberField.setDocument(new PlainDocument() {
                     JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
-            // Validate ID number format (0000-0000)
+            if (firstName.isEmpty() || lastName.isEmpty() || gender.isEmpty() || 
+            newIdNumber.isEmpty() || yearLevel.isEmpty()) {
+            JOptionPane.showMessageDialog(dialog, 
+                "All fields are required", 
+                "Validation Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        // ====== NEW VALIDATION: No special characters in names ======
+        if (!firstName.matches("[a-zA-Z\\s]+")) {
+            JOptionPane.showMessageDialog(dialog, 
+                "First Name can only contain letters and spaces", 
+                "Validation Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        if (!lastName.matches("[a-zA-Z\\s]+")) {
+            JOptionPane.showMessageDialog(dialog, 
+                "Last Name can only contain letters and spaces", 
+                "Validation Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
             if (!newIdNumber.matches("\\d{4}-\\d{4}")) {
                 JOptionPane.showMessageDialog(dialog, 
                     "ID Number must be in 0000-0000 format", 
